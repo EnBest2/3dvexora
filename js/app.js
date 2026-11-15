@@ -41,20 +41,305 @@ const AppState = {
   }
 };
 
+const CLOUD_STORAGE_KEYS = {
+  token: "3dvexora_gh_token",
+  snapshot: "3dvexora_cloud_snapshot_v1",
+  pendingSync: "3dvexora_cloud_pending_sync",
+  baseTs: "3dvexora_cloud_base_ts"
+};
+
+const GITHUB_SYNC_REPO = {
+  owner: "EnBest2",
+  repo: "3dvexora",
+  branch: "main",
+  dataPath: "data/sync.json"
+};
+
+function isCloudMode() {
+  return window.location.hostname.includes("github.io") || window.location.protocol === "file:";
+}
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function base64ToUtf8(b64) {
+  const cleanB64 = (b64 || "").replace(/\s+/g, "");
+  const binary = atob(cleanB64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+function getSaleSignature(sale) {
+  if (!sale) return "";
+  return [
+    String(sale.sale_date || ""),
+    String(sale.buyer_name || "").trim().toLowerCase(),
+    String(Math.round(Number(sale.total_sale_price_huf) || 0)),
+    String(sale.items_summary || "").trim(),
+    String(sale.notes || "").trim()
+  ].join("|");
+}
+
+function buildSaleProductsFromProjects(projects) {
+  return (projects || []).map(p => {
+    const item = (p.items && p.items.length > 0) ? p.items[0] : null;
+    const calc = item ? item.calculation_summary : null;
+    const qty = Math.max(1, parseInt(item?.quantity) || 1);
+    const unitCost = calc
+      ? Math.round(Number(calc.unit_net_cost) || 0)
+      : (p.summary?.total_net_cost ? Math.round(p.summary.total_net_cost / qty) : 0);
+    const unitPrice = calc
+      ? Math.round(Number(calc.unit_sale_price) || 0)
+      : Math.round((Number(p.total_price_huf) || 0) / qty);
+    return {
+      project_id: p.id,
+      name: p.project_name,
+      unit_cost: unitCost,
+      unit_price: unitPrice
+    };
+  });
+}
+
+function recomputeSalesSummaryClient(sales) {
+  const list = Array.isArray(sales) ? sales : [];
+  let totalRev = 0;
+  let totalCost = 0;
+  let totalSold = 0;
+
+  list.forEach(s => {
+    totalRev += Number(s.total_sale_price_huf) || 0;
+    totalCost += Number(s.total_cost_huf) || 0;
+    totalSold += Number(s.items_count) || 1;
+  });
+
+  const totalProf = totalRev - totalCost;
+  return {
+    total_revenue: Math.round(totalRev),
+    total_cost: Math.round(totalCost),
+    total_profit: Math.round(totalProf),
+    avg_profit_margin_percent: totalCost > 0 ? Math.round((totalProf / totalCost) * 1000) / 10 : 0,
+    total_items_sold: totalSold,
+    total_sales_count: list.length,
+    avg_order_value: list.length > 0 ? Math.round(totalRev / list.length) : 0
+  };
+}
+
+function sanitizeSettingsForCloud(settings) {
+  const clean = { ...(settings || {}) };
+  delete clean.github_token;
+  return clean;
+}
+
+function buildCurrentCloudSnapshot() {
+  const sales = Array.isArray(AppState.sales) ? AppState.sales : [];
+  return {
+    studio: "3DVEXORA Studio",
+    exported_at: new Date().toISOString(),
+    device: "3DVEXORA PWA",
+    settings: sanitizeSettingsForCloud(AppState.settings),
+    filaments: Array.isArray(AppState.filaments) ? AppState.filaments : [],
+    projects: Array.isArray(AppState.projects) ? AppState.projects : [],
+    sales: sales,
+    summary: recomputeSalesSummaryClient(sales)
+  };
+}
+
+function saveCloudSnapshotToLocalStorage(snapshot = null, markPending = false) {
+  const snap = snapshot || buildCurrentCloudSnapshot();
+  if (snap.settings) snap.settings = sanitizeSettingsForCloud(snap.settings);
+  try {
+    localStorage.setItem(CLOUD_STORAGE_KEYS.snapshot, JSON.stringify(snap));
+    if (markPending) {
+      localStorage.setItem(CLOUD_STORAGE_KEYS.pendingSync, "1");
+    }
+  } catch (e) {
+    console.warn("localStorage mentési figyelmeztetés:", e);
+  }
+}
+
+function loadLocalCloudSnapshot() {
+  try {
+    const raw = localStorage.getItem(CLOUD_STORAGE_KEYS.snapshot);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function applyCloudSnapshotData(data) {
+  if (!data) return;
+  if (Array.isArray(data.filaments)) AppState.filaments = data.filaments;
+  if (Array.isArray(data.projects)) AppState.projects = data.projects;
+  if (data.settings) AppState.settings = sanitizeSettingsForCloud(data.settings);
+  if (Array.isArray(data.sales)) AppState.sales = data.sales;
+  AppState.salesSummary = recomputeSalesSummaryClient(AppState.sales || []);
+  AppState.saleProducts = buildSaleProductsFromProjects(AppState.projects || []);
+}
+
+function updateCloudStatusBadge(text) {
+  const statusText = document.getElementById("sync-status-text");
+  if (statusText && text) {
+    statusText.innerText = text;
+  }
+}
+
+function mergeRemoteNewItemsIntoLocal(localData, remoteData) {
+  const merged = JSON.parse(JSON.stringify(localData || {}));
+  merged.filaments = Array.isArray(merged.filaments) ? merged.filaments : [];
+  merged.projects = Array.isArray(merged.projects) ? merged.projects : [];
+  merged.sales = Array.isArray(merged.sales) ? merged.sales : [];
+  merged.settings = { ...(remoteData?.settings || {}), ...(merged.settings || {}) };
+
+  const filKey = f => `${(f.brand || "").trim().toLowerCase()}|${(f.material || "").trim().toLowerCase()}|${(f.color_name || "").trim().toLowerCase()}`;
+  const filSet = new Set(merged.filaments.map(filKey));
+  (remoteData?.filaments || []).forEach(rf => {
+    if (!filSet.has(filKey(rf))) {
+      merged.filaments.push(rf);
+      filSet.add(filKey(rf));
+    }
+  });
+
+  const projSet = new Set(merged.projects.map(p => String(p.project_name || "").trim().toLowerCase()));
+  (remoteData?.projects || []).forEach(rp => {
+    const key = String(rp.project_name || "").trim().toLowerCase();
+    if (key && !projSet.has(key)) {
+      merged.projects.push(rp);
+      projSet.add(key);
+    }
+  });
+
+  const saleSet = new Set(merged.sales.map(getSaleSignature));
+  (remoteData?.sales || []).forEach(rs => {
+    const sig = getSaleSignature(rs);
+    if (sig && !saleSet.has(sig)) {
+      merged.sales.push(rs);
+      saleSet.add(sig);
+    }
+  });
+
+  merged.sales.sort((a, b) => String(b.sale_date || "").localeCompare(String(a.sale_date || "")));
+  merged.summary = recomputeSalesSummaryClient(merged.sales);
+  return merged;
+}
+
+async function fetchSyncJsonFromGitHubApi(token) {
+  if (!token) return null;
+  const url = `https://api.github.com/repos/${GITHUB_SYNC_REPO.owner}/${GITHUB_SYNC_REPO.repo}/contents/${GITHUB_SYNC_REPO.dataPath}?ref=${GITHUB_SYNC_REPO.branch}&t=${Date.now()}`;
+  const res = await fetch(url, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/vnd.github+json"
+    }
+  });
+  if (!res.ok) {
+    throw new Error(`GitHub API lekérdezési hiba (HTTP ${res.status})`);
+  }
+  const meta = await res.json();
+  const parsed = JSON.parse(base64ToUtf8(meta.content));
+  return { sha: meta.sha, data: parsed };
+}
+
+async function pushCloudSnapshotToGitHub(token, snapshot = null, existingSha = null) {
+  if (!token) return false;
+  const payloadSnap = snapshot || buildCurrentCloudSnapshot();
+  if (payloadSnap.settings) {
+    payloadSnap.settings = sanitizeSettingsForCloud(payloadSnap.settings);
+  }
+  const url = `https://api.github.com/repos/${GITHUB_SYNC_REPO.owner}/${GITHUB_SYNC_REPO.repo}/contents/${GITHUB_SYNC_REPO.dataPath}`;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let sha = attempt === 0 ? existingSha : null;
+    if (!sha) {
+      try {
+        const remote = await fetchSyncJsonFromGitHubApi(token);
+        sha = remote?.sha || null;
+      } catch (e) {
+        if (!e.message.includes("404")) throw e;
+      }
+    }
+
+    const body = {
+      message: `3DVEXORA Mobil/PWA szinkron (${new Date().toISOString().slice(0, 19)})`,
+      content: utf8ToBase64(JSON.stringify(payloadSnap, null, 2)),
+      branch: GITHUB_SYNC_REPO.branch
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (putRes.ok) {
+      localStorage.setItem(CLOUD_STORAGE_KEYS.baseTs, payloadSnap.exported_at);
+      localStorage.removeItem(CLOUD_STORAGE_KEYS.pendingSync);
+      localStorage.removeItem("3dvexora_offline_sales");
+      saveCloudSnapshotToLocalStorage(payloadSnap, false);
+      return true;
+    }
+
+    if (putRes.status === 409 && attempt === 0) {
+      continue;
+    }
+
+    const errText = await putRes.text();
+    throw new Error(`GitHub feltöltési hiba (HTTP ${putRes.status}): ${errText}`);
+  }
+  return false;
+}
+
+async function persistCloudMutation() {
+  AppState.salesSummary = recomputeSalesSummaryClient(AppState.sales || []);
+  AppState.saleProducts = buildSaleProductsFromProjects(AppState.projects || []);
+  saveCloudSnapshotToLocalStorage(null, true);
+
+  const token = localStorage.getItem(CLOUD_STORAGE_KEYS.token);
+  if (token) {
+    try {
+      const ok = await pushCloudSnapshotToGitHub(token);
+      if (ok) {
+        updateCloudStatusBadge("Felhő: Szinkronizálva ☁️");
+        return { synced: true };
+      }
+    } catch (e) {
+      console.warn("Háttér felhőszinkron sikertelen, helyben tárolva:", e);
+    }
+  }
+  updateCloudStatusBadge("HelyiPWA: Módosítva 📱");
+  return { synced: false };
+}
+
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", async () => {
   // PWA Service Worker bejegyzése (iPhone / Mobil offline támogatáshoz)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('3DVEXORA Service Worker aktív:', reg.scope))
+    navigator.serviceWorker.register('./sw.js?v=3')
+      .then(reg => {
+        if (reg && typeof reg.update === 'function') reg.update();
+        console.log('3DVEXORA Service Worker aktív:', reg.scope);
+      })
       .catch(err => console.log('Service Worker figyelmeztetés:', err));
   }
 
   setupNavigation();
   setupDropzone();
 
-  const isCloud = window.location.hostname.includes("github.io");
-  if (isCloud) {
+  if (isCloudMode()) {
     await loadAllFromCloudSyncFile();
     populateSettingsForm();
     renderFilamentTable();
@@ -132,6 +417,7 @@ function stepDown(inputId, step = 1) {
 
 // --- API Helpers ---
 async function apiGet(endpoint) {
+  if (isCloudMode()) return null;
   try {
     const res = await fetch(endpoint);
     return await res.json();
@@ -142,6 +428,7 @@ async function apiGet(endpoint) {
 }
 
 async function apiPost(endpoint, data) {
+  if (isCloudMode()) return null;
   try {
     const res = await fetch(endpoint, {
       method: "POST",
@@ -157,50 +444,72 @@ async function apiPost(endpoint, data) {
 
 // --- Load Data with Cloud / Static Fallback ---
 async function loadAllFromCloudSyncFile() {
-  try {
-    const res = await fetch(`./data/sync.json?t=${Date.now()}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data) {
-        if (data.filaments) AppState.filaments = data.filaments;
-        if (data.projects) AppState.projects = data.projects;
-        if (data.settings) AppState.settings = data.settings;
-        if (data.sales) AppState.sales = data.sales;
-        if (data.summary) AppState.salesSummary = data.summary;
+  let remoteData = null;
+  const token = localStorage.getItem(CLOUD_STORAGE_KEYS.token);
 
-        // Offline eladások összefésülése a localStorage-ból
-        try {
-          const offlineSales = JSON.parse(localStorage.getItem("3dvexora_offline_sales") || "[]");
-          if (Array.isArray(offlineSales) && offlineSales.length > 0) {
-            const existingIds = new Set((AppState.sales || []).map(s => s.id));
-            offlineSales.forEach(os => {
-              if (!existingIds.has(os.id)) {
-                AppState.sales.unshift(os);
-              }
-            });
-          }
-        } catch (e) {}
+  if (token) {
+    try {
+      const apiRes = await fetchSyncJsonFromGitHubApi(token);
+      if (apiRes && apiRes.data) remoteData = apiRes.data;
+    } catch (e) {
+      console.warn("GitHub API betöltési fallback sync.json-ra:", e.message);
+    }
+  }
 
-        // Eladási termékek lista előkészítése a projektekből
-        if (AppState.projects && AppState.projects.length > 0) {
-          AppState.saleProducts = AppState.projects.map(p => {
-            const item = (p.items && p.items.length > 0) ? p.items[0] : null;
-            const calc = item ? item.calculation_summary : null;
-            return {
-              project_id: p.id,
-              name: p.project_name,
-              unit_cost: calc ? (calc.unit_net_cost || 0) : 0,
-              unit_price: calc ? (calc.unit_sale_price || 0) : (p.total_price_huf || 0)
-            };
-          });
-        }
-        return true;
+  if (!remoteData) {
+    try {
+      const res = await fetch(`./data/sync.json?t=${Date.now()}`, { cache: "no-store" });
+      if (res.ok) {
+        remoteData = await res.json();
+      }
+    } catch (err) {
+      console.error("Hiba a cloud sync betöltésekor:", err);
+    }
+  }
+
+  const localSnap = loadLocalCloudSnapshot();
+  const isPending = localStorage.getItem(CLOUD_STORAGE_KEYS.pendingSync) === "1";
+
+  let finalData = null;
+  if (remoteData) {
+    if (isPending && localSnap) {
+      finalData = mergeRemoteNewItemsIntoLocal(localSnap, remoteData);
+    } else {
+      finalData = remoteData;
+      if (remoteData.exported_at) {
+        localStorage.setItem(CLOUD_STORAGE_KEYS.baseTs, remoteData.exported_at);
       }
     }
-  } catch (err) {
-    console.error("Hiba a cloud sync betöltésekor:", err);
+  } else if (localSnap) {
+    finalData = localSnap;
   }
-  return false;
+
+  if (!finalData) return false;
+
+  // Legacy offline eladások egyszeri átvétele duplikálás nélkül
+  let addedLegacy = false;
+  try {
+    const legacySales = JSON.parse(localStorage.getItem("3dvexora_offline_sales") || "[]");
+    if (Array.isArray(legacySales) && legacySales.length > 0) {
+      finalData.sales = Array.isArray(finalData.sales) ? finalData.sales : [];
+      const sigSet = new Set(finalData.sales.map(getSaleSignature));
+      legacySales.forEach(ls => {
+        const sig = getSaleSignature(ls);
+        if (sig && !sigSet.has(sig)) {
+          finalData.sales.unshift(ls);
+          sigSet.add(sig);
+          addedLegacy = true;
+        }
+      });
+      if (!addedLegacy && !isPending) {
+        localStorage.removeItem("3dvexora_offline_sales");
+      }
+    }
+  } catch (e) {}
+
+  applyCloudSnapshotData(finalData);
+  saveCloudSnapshotToLocalStorage(buildCurrentCloudSnapshot(), isPending || addedLegacy);
+  return true;
 }
 
 async function tryLoadFromCloudData() {
@@ -468,9 +777,9 @@ let debounceTimer = null;
 function recalculateCurrentItem() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(async () => {
-    let calc = await apiPost("/api/calculate", AppState.currentItem);
+    let calc = isCloudMode() ? null : await apiPost("/api/calculate", AppState.currentItem);
     if (!calc) {
-      // Fallback: Kliensoldali azonnali számítás (offline / iPhone GitHub Pages esetén)
+      // Kliensoldali azonnali számítás (offline / iPhone GitHub Pages esetén)
       calc = calculateItemCostClient(AppState.currentItem, AppState.settings);
     }
     if (calc) {
@@ -485,10 +794,13 @@ function calculateItemCostClient(itemData, settings = {}) {
   const quantity = Math.max(1, parseInt(itemData.quantity) || itemsOnPlate);
   const printHours = Math.max(0, parseFloat(itemData.print_hours) || 0);
   const printMinutes = Math.max(0, parseFloat(itemData.print_minutes) || 0);
-  const profitMargin = Math.max(0, parseFloat(itemData.profit_margin_percent) || 100);
+  const rawMargin = parseFloat(itemData.profit_margin_percent);
+  const profitMargin = Number.isFinite(rawMargin) ? Math.max(0, rawMargin) : 100;
 
-  const powerWatts = parseFloat(settings.printer_avg_power_watts || settings.printer_power_watts || 120);
-  const elecKwhCost = parseFloat(settings.electricity_kwh_cost || 70);
+  const rawPower = parseFloat(settings.printer_avg_power_watts ?? settings.printer_power_watts);
+  const powerWatts = Number.isFinite(rawPower) ? rawPower : 120;
+  const rawElec = parseFloat(settings.electricity_kwh_cost);
+  const elecKwhCost = Number.isFinite(rawElec) ? rawElec : 70;
 
   let plateMaterialCost = 0;
   let plateTotalGrams = 0;
@@ -728,19 +1040,56 @@ async function saveProjectToDb(saveAsNew = false) {
       quantity: AppState.currentItem.quantity || 1,
       print_hours: AppState.currentItem.print_hours || 0,
       print_minutes: AppState.currentItem.print_minutes || 0,
-      profit_margin_percent: AppState.currentItem.profit_margin_percent || 100,
+      profit_margin_percent: AppState.currentItem.profit_margin_percent ?? 100,
       filament_assignments: AppState.currentItem.filament_assignments,
-      calculation_summary: AppState.currentItem.calc || {},
+      calculation_summary: AppState.currentItem.calc || calculateItemCostClient(AppState.currentItem, AppState.settings),
       total_price_huf: AppState.currentItem.calc ? AppState.currentItem.calc.total_price : 0
     }]
   };
 
-  const res = await apiPost("/api/projects", payload);
+  let res = null;
+  if (isCloudMode()) {
+    const projects = Array.isArray(AppState.projects) ? AppState.projects : [];
+    const newId = targetId || (Math.max(0, ...projects.map(p => Number(p.id) || 0)) + 1);
+    const existing = projects.find(p => Number(p.id) === Number(newId));
+    const nowIso = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const savedProject = {
+      id: newId,
+      project_name: payload.project_name,
+      client_name: payload.client_name,
+      client_contact: payload.client_contact,
+      notes: payload.notes,
+      status: payload.status,
+      created_at: existing?.created_at || nowIso,
+      updated_at: nowIso,
+      total_price_huf: payload.items[0].total_price_huf,
+      items: [{
+        id: existing?.items?.[0]?.id || Date.now(),
+        project_id: newId,
+        ...payload.items[0]
+      }]
+    };
+    if (existing) {
+      AppState.projects = projects.map(p => (Number(p.id) === Number(newId) ? savedProject : p));
+    } else {
+      AppState.projects = [savedProject, ...projects];
+    }
+    await persistCloudMutation();
+    res = { success: true, id: newId };
+  } else {
+    res = await apiPost("/api/projects", payload);
+  }
+
   if (res && res.success) {
     AppState.currentProject.id = res.id;
     AppState.currentProject.loaded_name = projName;
     AppState.currentProject.project_name = projName;
-    await loadProjects();
+    if (isCloudMode()) {
+      renderProjectsList();
+      updateSaleProductsDropdowns();
+    } else {
+      await loadProjects();
+    }
     updateProjectHeaderStatus();
     
     // Vizuális megerősítés a gombon
@@ -874,15 +1223,24 @@ function openQuoteForProject(projId) {
 }
 
 async function deleteProjectFromDb(projId) {
-  if (confirm("Biztosan törölni szeretnéd ezt a mentett projektet?")) {
-    const res = await fetch(`/api/projects/${projId}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data && data.success) {
-      if (AppState.currentProject.id === projId) {
-        startNewCalculation();
-      }
-      await loadProjects();
+  if (!confirm("Biztosan törölni szeretnéd ezt a mentett projektet?")) return;
+  if (isCloudMode()) {
+    AppState.projects = (AppState.projects || []).filter(p => Number(p.id) !== Number(projId));
+    if (Number(AppState.currentProject.id) === Number(projId)) {
+      startNewCalculation();
     }
+    await persistCloudMutation();
+    renderProjectsList();
+    updateSaleProductsDropdowns();
+    return;
+  }
+  const res = await fetch(`/api/projects/${projId}`, { method: "DELETE" });
+  const data = await res.json();
+  if (data && data.success) {
+    if (AppState.currentProject.id === projId) {
+      startNewCalculation();
+    }
+    await loadProjects();
   }
 }
 
@@ -942,6 +1300,20 @@ async function addFilamentSubmit(event) {
     notes: form.notes.value.trim() || ""
   };
 
+  if (isCloudMode()) {
+    const filaments = Array.isArray(AppState.filaments) ? AppState.filaments : [];
+    const newId = Math.max(0, ...filaments.map(f => Number(f.id) || 0)) + 1;
+    const costPerGram = Math.round((payload.spool_price_huf / Math.max(1, payload.spool_weight_g)) * 100) / 100;
+    AppState.filaments = [...filaments, { id: newId, ...payload, cost_per_gram: costPerGram }];
+    await persistCloudMutation();
+    form.reset();
+    renderFilamentTable();
+    renderAmsSlots();
+    recalculateCurrentItem();
+    alert("✅ Új filament sikeresen hozzáadva a készlethez!");
+    return;
+  }
+
   const res = await apiPost("/api/filaments", payload);
   if (res && res.success) {
     alert("✅ Új filament sikeresen hozzáadva a készlethez!");
@@ -951,12 +1323,19 @@ async function addFilamentSubmit(event) {
 }
 
 async function deleteFilament(id) {
-  if (confirm("Biztosan törölni szeretnéd ezt a filamentet a készletedből?")) {
-    const res = await fetch(`/api/filaments/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data && data.success) {
-      await loadFilaments();
-    }
+  if (!confirm("Biztosan törölni szeretnéd ezt a filamentet a készletedből?")) return;
+  if (isCloudMode()) {
+    AppState.filaments = (AppState.filaments || []).filter(f => Number(f.id) !== Number(id));
+    await persistCloudMutation();
+    renderFilamentTable();
+    renderAmsSlots();
+    recalculateCurrentItem();
+    return;
+  }
+  const res = await fetch(`/api/filaments/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  if (data && data.success) {
+    await loadFilaments();
   }
 }
 
@@ -970,7 +1349,7 @@ function populateSettingsForm() {
 
   setVal("set-power", s.printer_avg_power_watts || 120);
   setVal("set-elec", s.electricity_kwh_cost || 70);
-  setVal("set-profit", s.default_profit_margin_percent || 100);
+  setVal("set-profit", s.default_profit_margin_percent ?? 100);
   setVal("set-tax", s.tax_rate_percent || 0);
 }
 
@@ -983,6 +1362,14 @@ async function saveSettingsSubmit(event) {
     default_profit_margin_percent: parseFloat(form.profit.value),
     tax_rate_percent: parseFloat(form.tax.value)
   };
+
+  if (isCloudMode()) {
+    AppState.settings = sanitizeSettingsForCloud({ ...(AppState.settings || {}), ...payload });
+    await persistCloudMutation();
+    alert("✅ Beállítások sikeresen elmentve!");
+    recalculateCurrentItem();
+    return;
+  }
 
   const res = await apiPost("/api/settings", payload);
   if (res && res.success) {
@@ -1027,7 +1414,7 @@ function renderQuoteView() {
           </p>
         </div>
         <div>
-          <img src="/api/logo" alt="3DVEXORA">
+          <img src="${isCloudMode() ? 'assets/apple-touch-icon.png' : '/api/logo'}" alt="3DVEXORA">
         </div>
       </div>
 
@@ -1100,29 +1487,24 @@ function renderQuoteView() {
 
 async function loadSales() {
   try {
+    if (isCloudMode()) {
+      AppState.sales = Array.isArray(AppState.sales) ? AppState.sales : [];
+      AppState.salesSummary = recomputeSalesSummaryClient(AppState.sales);
+      AppState.saleProducts = buildSaleProductsFromProjects(AppState.projects || []);
+      renderSalesKpis();
+      renderSalesTable();
+      updateSaleProductsDropdowns();
+      return;
+    }
+
     let res = await apiGet("/api/sales");
     if (!res || !res.success) {
-      await tryLoadFromCloudData();
-      try {
-        const localSaved = localStorage.getItem("3dvexora_offline_sales");
-        if (localSaved) {
-          const parsed = JSON.parse(localSaved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            AppState.sales = parsed;
-          }
-        }
-      } catch (e) {}
-
+      await loadAllFromCloudSyncFile();
       res = {
         success: true,
         sales: AppState.sales || [],
-        summary: AppState.salesSummary || {},
-        products: (AppState.projects || []).map(p => ({
-          project_id: p.id,
-          name: p.project_name,
-          unit_cost: p.summary?.total_net_cost || 0,
-          unit_price: p.summary?.final_price_with_tax || 0
-        }))
+        summary: recomputeSalesSummaryClient(AppState.sales || []),
+        products: buildSaleProductsFromProjects(AppState.projects || [])
       };
     }
 
@@ -1493,45 +1875,40 @@ async function handleSaleSubmit(e) {
   }
 
   try {
-    let res = await apiPost("/api/sales", payload);
+    let res = isCloudMode() ? null : await apiPost("/api/sales", payload);
     if (!res || !res.success) {
-      // Offline / Statikus PWA fallback: Mentés memóriába és localStorage-ba
+      if (!isCloudMode() && res && res.error) {
+        alert("Hiba történt az eladás mentésekor: " + res.error);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "💾 Eladás Rögzítése & Mentése";
+        }
+        return;
+      }
+
+      // Offline / Statikus PWA mód: Mentés memóriába, localStorage-ba és kétirányú GitHub szinkronba
+      const currentSales = Array.isArray(AppState.sales) ? AppState.sales : [];
+      const newSaleId = Math.max(0, ...currentSales.map(s => Number(s.id) || 0)) + 1;
+      const totalCost = Math.round(payload.items.reduce((acc, it) => acc + (Number(it.total_cost_huf) || 0), 0));
+      const profit = Math.round(payload.total_sale_price_huf - totalCost);
       const offlineSale = {
-        id: Date.now(),
+        id: newSaleId,
         sale_date: payload.sale_date,
         buyer_name: payload.buyer_name,
         channel: payload.channel,
         notes: payload.notes,
         total_sale_price_huf: payload.total_sale_price_huf,
-        total_cost_huf: payload.items.reduce((acc, it) => acc + (it.total_cost_huf || 0), 0),
+        total_cost_huf: totalCost,
+        profit_huf: profit,
+        profit_margin_percent: totalCost > 0 ? Math.round((profit / totalCost) * 1000) / 10 : 0,
         items_count: payload.items.reduce((acc, it) => acc + (it.quantity || 1), 0),
         items_summary: payload.items.map(it => `${it.item_name} (${it.quantity}x)`).join(", "),
-        is_bundle: payload.items.length > 1
+        is_bundle: payload.items.length > 1,
+        items: payload.items
       };
-      offlineSale.profit_huf = offlineSale.total_sale_price_huf - offlineSale.total_cost_huf;
-      offlineSale.profit_margin_percent = offlineSale.total_cost_huf > 0 ? Math.round((offlineSale.profit_huf / offlineSale.total_cost_huf) * 100) : 0;
 
-      AppState.sales = [offlineSale, ...(AppState.sales || [])];
-      try {
-        localStorage.setItem("3dvexora_offline_sales", JSON.stringify(AppState.sales));
-      } catch (e) {}
-
-      let totalRev = 0, totalCost = 0, totalSold = 0;
-      AppState.sales.forEach(s => {
-        totalRev += s.total_sale_price_huf || 0;
-        totalCost += s.total_cost_huf || 0;
-        totalSold += s.items_count || 1;
-      });
-      const totalProf = totalRev - totalCost;
-      AppState.salesSummary = {
-        total_revenue: totalRev,
-        total_cost: totalCost,
-        total_profit: totalProf,
-        avg_profit_margin_percent: totalCost > 0 ? Math.round((totalProf / totalCost) * 100) : 0,
-        total_items_sold: totalSold,
-        total_sales_count: AppState.sales.length,
-        avg_order_value: AppState.sales.length > 0 ? Math.round(totalRev / AppState.sales.length) : 0
-      };
+      AppState.sales = [offlineSale, ...currentSales];
+      await persistCloudMutation();
 
       res = { success: true, sales: AppState.sales, summary: AppState.salesSummary };
     }
@@ -1579,6 +1956,13 @@ async function handleSaleSubmit(e) {
 
 async function deleteSaleFromDb(saleId) {
   if (confirm("Biztosan törölni szeretnéd ezt az eladási tételt a nyilvántartásból?")) {
+    if (isCloudMode()) {
+      AppState.sales = (AppState.sales || []).filter(s => Number(s.id) !== Number(saleId));
+      await persistCloudMutation();
+      renderSalesKpis();
+      renderSalesTable();
+      return;
+    }
     try {
       const res = await fetch(`/api/sales/${saleId}`, { method: "DELETE" });
       const data = await res.json();
@@ -1672,14 +2056,82 @@ function exportSalesToCsv() {
 // --- Mobil PWA, QR Kód & Felhőszinkron Modals ---
 // ==========================================
 
+function refreshAllCloudViews() {
+  populateSettingsForm();
+  renderFilamentTable();
+  renderAmsSlots();
+  renderProjectsList();
+  renderSalesKpis();
+  renderSalesTable();
+  updateSaleProductsDropdowns();
+  recalculateCurrentItem();
+}
+
+async function syncCloudBidirectional(tokenInputValue = null) {
+  const savedToken = localStorage.getItem(CLOUD_STORAGE_KEYS.token);
+  const token = (tokenInputValue || savedToken || "").trim();
+  const isPending = localStorage.getItem(CLOUD_STORAGE_KEYS.pendingSync) === "1";
+
+  if (!token) {
+    const ok = await loadAllFromCloudSyncFile();
+    if (ok) refreshAllCloudViews();
+    return {
+      mode: "pull_only",
+      needsToken: isPending
+    };
+  }
+
+  localStorage.setItem(CLOUD_STORAGE_KEYS.token, token);
+
+  let remoteMeta = null;
+  try {
+    remoteMeta = await fetchSyncJsonFromGitHubApi(token);
+  } catch (e) {
+    if (!e.message.includes("404")) throw e;
+  }
+
+  if (remoteMeta && remoteMeta.data) {
+    if (isPending) {
+      const merged = mergeRemoteNewItemsIntoLocal(buildCurrentCloudSnapshot(), remoteMeta.data);
+      applyCloudSnapshotData(merged);
+      await pushCloudSnapshotToGitHub(token, buildCurrentCloudSnapshot(), remoteMeta.sha);
+      refreshAllCloudViews();
+      return { mode: "merged_and_pushed" };
+    } else {
+      applyCloudSnapshotData(remoteMeta.data);
+      localStorage.setItem(CLOUD_STORAGE_KEYS.baseTs, remoteMeta.data.exported_at || new Date().toISOString());
+      localStorage.removeItem(CLOUD_STORAGE_KEYS.pendingSync);
+      localStorage.removeItem("3dvexora_offline_sales");
+      saveCloudSnapshotToLocalStorage(buildCurrentCloudSnapshot(), false);
+      refreshAllCloudViews();
+      return { mode: "pulled_latest" };
+    }
+  } else {
+    await pushCloudSnapshotToGitHub(token, buildCurrentCloudSnapshot(), null);
+    refreshAllCloudViews();
+    return { mode: "pushed_initial" };
+  }
+}
+
 async function checkSyncStatusOnStartup() {
+  if (isCloudMode()) {
+    const isPending = localStorage.getItem(CLOUD_STORAGE_KEYS.pendingSync) === "1";
+    const hasToken = !!localStorage.getItem(CLOUD_STORAGE_KEYS.token);
+    if (isPending && hasToken) {
+      try {
+        await syncCloudBidirectional();
+        updateCloudStatusBadge("Felhő: Szinkronizálva ☁️");
+        return;
+      } catch (e) {}
+    }
+    updateCloudStatusBadge(isPending ? "HelyiPWA: Várakozik 📱" : (hasToken ? "Felhő: Kétirányú ☁️" : "Felhő: Élő ☁️"));
+    return;
+  }
+
   try {
     const info = await apiGet("/api/sync/info");
     if (info && info.success) {
-      const statusText = document.getElementById("sync-status-text");
-      if (statusText) {
-        statusText.innerText = info.is_cloud_synced ? "Felhő: Aktív ☁️" : "Wi-Fi: Kész 📶";
-      }
+      updateCloudStatusBadge(info.is_cloud_synced ? "Felhő: Aktív ☁️" : "Wi-Fi: Kész 📶");
     }
   } catch (e) {
     // Offline / Statikus módban normális
@@ -1691,14 +2143,19 @@ async function showMobileConnectModal() {
   if (!modal) return;
   modal.style.display = "flex";
 
-  let wifiUrl = window.location.origin;
-  try {
-    const info = await apiGet("/api/sync/info");
-    if (info && info.wifi_url) {
-      wifiUrl = info.wifi_url;
+  let wifiUrl = isCloudMode()
+    ? `${window.location.origin}${window.location.pathname}`
+    : window.location.origin;
+
+  if (!isCloudMode()) {
+    try {
+      const info = await apiGet("/api/sync/info");
+      if (info && info.wifi_url) {
+        wifiUrl = info.wifi_url;
+      }
+    } catch (e) {
+      // Statikus fallback
     }
-  } catch (e) {
-    // Statikus fallback
   }
 
   const wifiInput = document.getElementById("local-wifi-url");
@@ -1716,17 +2173,31 @@ async function showCloudSyncModal() {
   modal.style.display = "flex";
 
   const tokenInput = document.getElementById("github-token-input");
-  if (tokenInput && AppState.settings?.github_token) {
-    tokenInput.value = AppState.settings.github_token;
+  const cloudToken = isCloudMode() ? localStorage.getItem(CLOUD_STORAGE_KEYS.token) : null;
+  if (tokenInput) {
+    tokenInput.value = cloudToken || AppState.settings?.github_token || "";
+  }
+
+  const statusEl = document.getElementById("sync-modal-status-text");
+  if (statusEl && isCloudMode()) {
+    const isPending = localStorage.getItem(CLOUD_STORAGE_KEYS.pendingSync) === "1";
+    if (isPending) {
+      statusEl.innerText = "📱 Helyi módosítások várnak feltöltésre";
+    } else if (cloudToken) {
+      statusEl.innerText = "☁️ Kétirányú GitHub szinkron aktív ezen az eszközön";
+    } else {
+      statusEl.innerText = "📥 GitHub adatbetöltés aktív (add meg a tokent a feltöltéshez)";
+    }
   }
 
   const lastTimeEl = document.getElementById("sync-last-time");
-  if (lastTimeEl && AppState.settings?.last_cloud_sync) {
+  const lastTs = (isCloudMode() ? localStorage.getItem(CLOUD_STORAGE_KEYS.baseTs) : null) || AppState.settings?.last_cloud_sync;
+  if (lastTimeEl && lastTs) {
     try {
-      const d = new Date(AppState.settings.last_cloud_sync);
+      const d = new Date(lastTs);
       lastTimeEl.innerText = `Utolsó szinkron: ${d.toLocaleString('hu-HU')}`;
     } catch (e) {
-      lastTimeEl.innerText = `Utolsó szinkron: ${AppState.settings.last_cloud_sync}`;
+      lastTimeEl.innerText = `Utolsó szinkron: ${lastTs}`;
     }
   }
 }
@@ -1758,6 +2229,22 @@ async function triggerManualSync() {
   if (btn) btn.disabled = true;
 
   try {
+    if (isCloudMode()) {
+      const inputVal = document.getElementById("github-token-input")?.value.trim();
+      const res = await syncCloudBidirectional(inputVal || null);
+      if (res.mode === "pull_only") {
+        if (res.needsToken) {
+          if (statusEl) statusEl.innerText = "⚠️ Add meg alul a GitHub tokent, hogy a mobil módosítások felmenjenek a PC-re!";
+        } else {
+          if (statusEl) statusEl.innerText = "✅ Friss adatok letöltve a GitHub-ról!";
+        }
+      } else {
+        if (statusEl) statusEl.innerText = "✅ Kétirányú szinkron sikeres (GitHub <-> Mobil)!";
+      }
+      updateCloudStatusBadge("Felhő: Szinkronizálva ☁️");
+      return;
+    }
+
     const res = await apiPost("/api/sync/manual", {});
     if (res && res.status === "success") {
       if (statusEl) statusEl.innerText = "✅ Sikeresen szinkronizálva a felhővel!";
@@ -1790,13 +2277,25 @@ async function deployToGitHubFromUI() {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerText = "⏳ Feltöltés és GitHub Pages aktiválás folyamatban...";
+    btn.innerText = isCloudMode() ? "⏳ Felhőszinkron mentése..." : "⏳ Feltöltés és GitHub Pages aktiválás folyamatban...";
   }
   if (resDiv) {
-    resDiv.innerHTML = `<span style="color:var(--orange-primary);">🚀 Fájlok feltöltése a GitHub-ra folyamatban... Ez kb. 10-20 másodperc.</span>`;
+    resDiv.innerHTML = `<span style="color:var(--orange-primary);">🚀 ${isCloudMode() ? "Adatok szinkronizálása a GitHub-ra" : "Fájlok feltöltése a GitHub-ra"} folyamatban...</span>`;
   }
 
   try {
+    if (isCloudMode()) {
+      await syncCloudBidirectional(token);
+      if (resDiv) {
+        resDiv.innerHTML = `<div style="color:#10B981; padding:8px 0; font-weight:700;">✅ Token elmentve ezen az eszközön és minden adat kétirányúan szinkronizálva a GitHub-ra!</div>`;
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "✅ Szinkronizálva!";
+      }
+      return;
+    }
+
     const res = await apiPost("/api/sync/github-deploy", {
       token: token,
       username: "EnBest2",
