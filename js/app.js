@@ -326,14 +326,21 @@ async function persistCloudMutation() {
 
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", async () => {
-  // PWA Service Worker bejegyzése (iPhone / Mobil offline támogatáshoz)
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  // Helyi PC módban ne cache-elje elavult Service Worker az appot; csak távoli/PWA módban aktiváljuk
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js?v=4')
-      .then(reg => {
-        if (reg && typeof reg.update === 'function') reg.update();
-        console.log('3DVEXORA Service Worker aktív:', reg.scope);
-      })
-      .catch(err => console.log('Service Worker figyelmeztetés:', err));
+    if (isLocalHost) {
+      navigator.serviceWorker.getRegistrations()
+        .then(regs => regs.forEach(r => r.unregister()))
+        .catch(() => {});
+    } else {
+      navigator.serviceWorker.register('./sw.js?v=5')
+        .then(reg => {
+          if (reg && typeof reg.update === 'function') reg.update();
+          console.log('3DVEXORA Service Worker aktív:', reg.scope);
+        })
+        .catch(err => console.log('Service Worker figyelmeztetés:', err));
+    }
   }
 
   setupNavigation();
@@ -530,11 +537,11 @@ async function loadSettings() {
 
 async function loadFilaments() {
   let data = await apiGet("/api/filaments");
-  if (!data || data.length === 0) {
+  if (!Array.isArray(data)) {
     await tryLoadFromCloudData();
     data = AppState.filaments;
   }
-  if (data) {
+  if (Array.isArray(data)) {
     AppState.filaments = data;
     renderFilamentTable();
     renderAmsSlots();
@@ -543,11 +550,11 @@ async function loadFilaments() {
 
 async function loadProjects() {
   let data = await apiGet("/api/projects");
-  if (!data || data.length === 0) {
+  if (!Array.isArray(data)) {
     await tryLoadFromCloudData();
     data = AppState.projects;
   }
-  if (data) {
+  if (Array.isArray(data)) {
     AppState.projects = data;
     renderProjectsList();
     loadSales();
@@ -1289,36 +1296,62 @@ function renderFilamentTable() {
 async function addFilamentSubmit(event) {
   event.preventDefault();
   const form = event.target;
+  const weightVal = parseFloat(form.spool_weight_g.value);
+  const priceVal = parseFloat(form.spool_price_huf.value);
+  const remRaw = form.remaining_g.value.trim();
+  const remVal = remRaw === "" ? weightVal : parseFloat(remRaw);
+
   const payload = {
     brand: form.brand.value.trim(),
     material: form.material.value.trim(),
     color_name: form.color_name.value.trim(),
-    color_hex: form.color_hex.value,
-    spool_weight_g: parseFloat(form.spool_weight_g.value),
-    spool_price_huf: parseFloat(form.spool_price_huf.value),
-    remaining_g: parseFloat(form.remaining_g.value || 1000),
+    color_hex: form.color_hex.value || "#FF6E00",
+    spool_weight_g: weightVal,
+    spool_price_huf: priceVal,
+    remaining_g: Number.isFinite(remVal) ? remVal : weightVal,
     notes: form.notes.value.trim() || ""
   };
+
+  if (!payload.brand || !payload.material || !payload.color_name || !Number.isFinite(weightVal) || weightVal <= 0 || !Number.isFinite(priceVal) || priceVal < 0) {
+    alert("⚠️ Kérlek add meg helyesen a gyártót, anyagtípust, színt, valamint a tekercs súlyát és árát!");
+    return;
+  }
 
   if (isCloudMode()) {
     const filaments = Array.isArray(AppState.filaments) ? AppState.filaments : [];
     const newId = Math.max(0, ...filaments.map(f => Number(f.id) || 0)) + 1;
     const costPerGram = Math.round((payload.spool_price_huf / Math.max(1, payload.spool_weight_g)) * 100) / 100;
     AppState.filaments = [...filaments, { id: newId, ...payload, cost_per_gram: costPerGram }];
-    await persistCloudMutation();
+    const syncRes = await persistCloudMutation();
     form.reset();
     renderFilamentTable();
     renderAmsSlots();
     recalculateCurrentItem();
-    alert("✅ Új filament sikeresen hozzáadva a készlethez!");
+    if (syncRes && syncRes.synced) {
+      alert("✅ Új filament hozzáadva és szinkronizálva a felhőbe!");
+    } else {
+      alert("✅ Új filament hozzáadva ezen az eszközön!\n⚠️ A felhőbe / PC-re szinkronizáláshoz add meg a GitHub tokent a '☁️ Felhő' menüben.");
+    }
     return;
   }
 
   const res = await apiPost("/api/filaments", payload);
   if (res && res.success) {
-    alert("✅ Új filament sikeresen hozzáadva a készlethez!");
+    if (Array.isArray(res.filaments)) {
+      AppState.filaments = res.filaments;
+      renderFilamentTable();
+      renderAmsSlots();
+      recalculateCurrentItem();
+    } else {
+      await loadFilaments();
+    }
     form.reset();
-    await loadFilaments();
+    alert("✅ Új filament sikeresen hozzáadva a készlethez!");
+  } else {
+    const errMsg = res && res.error
+      ? res.error
+      : "Nem érhető el a helyi 3DVEXORA háttérszerver (indítsd el újra a 3DVEXORA programot)!";
+    alert("❌ Hiba történt a filament mentésekor:\n" + errMsg);
   }
 }
 
@@ -1332,10 +1365,23 @@ async function deleteFilament(id) {
     recalculateCurrentItem();
     return;
   }
-  const res = await fetch(`/api/filaments/${id}`, { method: "DELETE" });
-  const data = await res.json();
-  if (data && data.success) {
-    await loadFilaments();
+  try {
+    const res = await fetch(`/api/filaments/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data && data.success) {
+      if (Array.isArray(data.filaments)) {
+        AppState.filaments = data.filaments;
+        renderFilamentTable();
+        renderAmsSlots();
+        recalculateCurrentItem();
+      } else {
+        await loadFilaments();
+      }
+    } else {
+      alert("❌ Hiba a filament törlésekor: " + (data?.error || "Ismeretlen hiba"));
+    }
+  } catch (err) {
+    alert("❌ Nem sikerült törölni a filamentet (nem fut a helyi szerver): " + err.message);
   }
 }
 
@@ -1376,6 +1422,8 @@ async function saveSettingsSubmit(event) {
     AppState.settings = res.settings;
     alert("✅ Beállítások sikeresen elmentve!");
     recalculateCurrentItem();
+  } else {
+    alert("❌ Hiba a beállítások mentésekor: " + (res?.error || "Nem fut a helyi háttérszerver!"));
   }
 }
 
