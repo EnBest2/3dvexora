@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-15T13:12:58.632013",
+  "exported_at": "2026-11-15T13:13:18.657272",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,22 +16,9 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-15T13:12:28.713337"
+    "last_cloud_sync": "2026-11-15T13:12:59.642211"
   },
   "filaments": [
-    {
-      "id": 14,
-      "brand": "Alma",
-      "material": "Pla",
-      "color_name": "Alma",
-      "color_hex": "#000000",
-      "spool_weight_g": 1000.0,
-      "spool_price_huf": 4980.0,
-      "remaining_g": 1000.0,
-      "notes": "",
-      "created_at": "2026-11-15 12:12:27",
-      "cost_per_gram": 4.98
-    },
     {
       "id": 10,
       "brand": "Alzament",
