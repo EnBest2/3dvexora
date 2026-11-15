@@ -322,15 +322,15 @@
           <div class="form-row">
             <div class="form-group">
               <label>Tekercs Beszerzési Ára (Ft)</label>
-              <input type="number" name="spool_price_huf" min="500" step="10" placeholder="pl. 8490" required>
+              <input type="number" name="spool_price_huf" min="1" step="any" placeholder="pl. 8490" required>
             </div>
             <div class="form-group">
               <label>Tekercs Súlya (gramm)</label>
-              <input type="number" name="spool_weight_g" min="100" step="50" value="1000" required>
+              <input type="number" name="spool_weight_g" min="1" step="any" value="1000" required>
             </div>
             <div class="form-group">
               <label>Készleten lévő mennyiség (g)</label>
-              <input type="number" name="remaining_g" min="0" value="1000">
+              <input type="number" name="remaining_g" min="0" step="any" value="1000">
             </div>
             <div class="form-group">
               <label>Megjegyzés / RFID</label>
@@ -769,6 +769,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=4"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
