@@ -328,7 +328,7 @@ async function persistCloudMutation() {
 document.addEventListener("DOMContentLoaded", async () => {
   // PWA Service Worker bejegyzése (iPhone / Mobil offline támogatáshoz)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js?v=3')
+    navigator.serviceWorker.register('./sw.js?v=4')
       .then(reg => {
         if (reg && typeof reg.update === 'function') reg.update();
         console.log('3DVEXORA Service Worker aktív:', reg.scope);
@@ -1134,8 +1134,8 @@ function renderProjectsList() {
     return `
       <div class="card" style="margin-bottom:14px; border-left: 4px solid var(--orange-primary);">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-          <div>
-            <h3 style="color:var(--silver-primary); font-size:17px; margin-bottom:4px;">
+          <div style="min-width:0; flex:1 1 220px;">
+            <h3 style="color:var(--silver-primary); font-size:17px; margin-bottom:4px; word-break:break-word;">
               ${p.project_name}
             </h3>
             <p style="font-size:12px; color:var(--text-muted);">
@@ -1144,16 +1144,16 @@ function renderProjectsList() {
               Mennyiség: <strong>${qty} db</strong> (tálcán: ${plateQty} db)
             </p>
           </div>
-          <div style="text-align:right;">
+          <div class="project-item-actions" style="text-align:right;">
             <div style="font-size:22px; font-weight:900; color:var(--orange-primary);">
               ${(p.total_price_huf || 0).toLocaleString('hu-HU')} Ft
             </div>
             <div style="font-size:12px; color:var(--silver-muted); margin-bottom:8px;">
               ${(unitPrice || 0).toLocaleString('hu-HU')} Ft / db
             </div>
-            <div style="display:flex; gap:8px;">
+            <div class="project-item-btns">
               <button class="btn btn-primary btn-sm" onclick="loadProjectIntoCalc(${p.id})">
-                📂 Megnyitás a Kalkulátorba
+                📂 Megnyitás
               </button>
               <button class="btn btn-secondary btn-sm" onclick="openQuoteForProject(${p.id})">
                 📑 Árajánlat
@@ -1418,45 +1418,47 @@ function renderQuoteView() {
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+      <div class="quote-meta-grid">
         <div>
           <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#718096; margin-bottom:3px;">Megrendelő</div>
           <div style="font-size:16px; font-weight:700; color:#1A202C;">
             ${AppState.currentProject.client_name || 'Tisztelt Megrendelőnk'}
           </div>
-          <div style="font-size:13px; color:#4A5568;">
+          <div style="font-size:13px; color:#4A5568; word-break:break-word;">
             Projekt: <strong>${AppState.currentProject.project_name}</strong>
           </div>
         </div>
-        <div style="text-align:right;">
+        <div class="quote-meta-right" style="text-align:right;">
           <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#718096; margin-bottom:3px;">Ajánlat részletei</div>
           <div style="font-size:13px; color:#1A202C;"><strong>Azonosító:</strong> ${quoteNum}</div>
           <div style="font-size:13px; color:#4A5568;"><strong>Dátum:</strong> ${today}</div>
         </div>
       </div>
 
-      <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
-        <thead>
-          <tr style="background:#F7FAFC; border-bottom:2px solid #CBD5E0; text-align:left; font-size:11px; text-transform:uppercase; color:#4A5568;">
-            <th style="padding:10px;">Tétel / Modell</th>
-            <th style="padding:10px;">Anyag & Szín (AMS)</th>
-            <th style="padding:10px; text-align:center;">Mennyiség</th>
-            <th style="padding:10px; text-align:right;">Egységár (1 db)</th>
-            <th style="padding:10px; text-align:right;">Összesen</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid #E2E8F0;">
-            <td style="padding:12px 10px;"><strong>${item.name}</strong></td>
-            <td style="padding:12px 10px; color:#4A5568; font-size:12px;">${filText}</td>
-            <td style="padding:12px 10px; text-align:center;"><strong>${item.quantity} db</strong></td>
-            <td style="padding:12px 10px; text-align:right;">${calc.unit_sale_price.toLocaleString('hu-HU')} Ft / db</td>
-            <td style="padding:12px 10px; text-align:right; font-weight:700; color:#FF6E00;">${calc.total_price.toLocaleString('hu-HU')} Ft</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive" style="margin-bottom:24px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#F7FAFC; border-bottom:2px solid #CBD5E0; text-align:left; font-size:11px; text-transform:uppercase; color:#4A5568;">
+              <th style="padding:10px;">Tétel / Modell</th>
+              <th style="padding:10px;">Anyag & Szín (AMS)</th>
+              <th style="padding:10px; text-align:center;">Mennyiség</th>
+              <th style="padding:10px; text-align:right;">Egységár (1 db)</th>
+              <th style="padding:10px; text-align:right;">Összesen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #E2E8F0;">
+              <td style="padding:12px 10px;"><strong>${item.name}</strong></td>
+              <td style="padding:12px 10px; color:#4A5568; font-size:12px;">${filText}</td>
+              <td style="padding:12px 10px; text-align:center;"><strong>${item.quantity} db</strong></td>
+              <td style="padding:12px 10px; text-align:right; white-space:nowrap;">${calc.unit_sale_price.toLocaleString('hu-HU')} Ft / db</td>
+              <td style="padding:12px 10px; text-align:right; font-weight:700; color:#FF6E00; white-space:nowrap;">${calc.total_price.toLocaleString('hu-HU')} Ft</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div style="width:300px; margin-left:auto; border-top:2px solid #E2E8F0; padding-top:10px;">
+      <div class="quote-totals-box">
         <div style="display:flex; justify-content:space-between; padding:5px 0;">
           <span>Nyomtatási díj:</span>
           <strong>${calc.total_price.toLocaleString('hu-HU')} Ft</strong>
@@ -1473,7 +1475,7 @@ function renderQuoteView() {
         </div>
       </div>
 
-      <div style="margin-top:40px; padding-top:16px; border-top:1px solid #E2E8F0; font-size:11px; color:#718096; display:flex; justify-content:space-between;">
+      <div style="margin-top:40px; padding-top:16px; border-top:1px solid #E2E8F0; font-size:11px; color:#718096; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
         <div>Köszönjük a megrendelést! • 3DVEXORA 3D Printing Studio</div>
         <div>Érvényes: 14 napig</div>
       </div>
@@ -1663,7 +1665,8 @@ function addSaleItemRow(defaultName = '', defaultCost = 0, defaultQty = 1, defau
   rowDiv.className = "sale-item-row";
   rowDiv.id = rowId;
   rowDiv.innerHTML = `
-    <div>
+    <div class="sale-item-product">
+      <span class="sale-mobile-label">Termék / Modell</span>
       <select class="sale-row-select" onchange="onSaleProductSelectChanged('${rowId}', this)" style="width:100%; font-size:12px; padding:6px 8px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main); margin-bottom:4px;">
         ${optionsHtml}
       </select>
@@ -1672,25 +1675,30 @@ function addSaleItemRow(defaultName = '', defaultCost = 0, defaultQty = 1, defau
     </div>
 
     <div>
+      <span class="sale-mobile-label">Darabszám (db)</span>
       <input type="number" class="sale-row-qty" min="1" step="1" value="${defaultQty}" 
              oninput="onSaleItemRowUpdated('${rowId}')" 
              style="width:100%; font-size:13px; font-weight:700; padding:6px 8px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main); text-align:center;">
     </div>
 
     <div>
+      <span class="sale-mobile-label">1 db Önköltség (Ft)</span>
       <input type="number" class="sale-row-cost" min="0" step="1" value="${defaultCost}" 
              oninput="onSaleItemRowUpdated('${rowId}')" placeholder="0"
              style="width:100%; font-size:13px; padding:6px 8px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main); text-align:right;">
     </div>
 
-    <div style="text-align:right; font-weight:700; color:var(--silver-primary); font-size:13px;">
-      <span class="sale-row-total-cost">0 Ft</span>
-    </div>
+    <div class="sale-row-actions">
+      <div style="text-align:right; font-weight:700; color:var(--silver-primary); font-size:13px;">
+        <span class="sale-mobile-label" style="text-align:left; margin-bottom:0;">Sor költsége:</span>
+        <span class="sale-row-total-cost">0 Ft</span>
+      </div>
 
-    <div style="text-align:center;">
-      <button type="button" class="btn btn-danger btn-sm" onclick="removeSaleItemRow('${rowId}')" title="Tétel törlése" style="padding:4px 8px; border-radius:4px;">
-        ✕
-      </button>
+      <div style="text-align:center;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeSaleItemRow('${rowId}')" title="Tétel törlése" style="padding:4px 8px; border-radius:4px;">
+          ✕
+        </button>
+      </div>
     </div>
   `;
 
