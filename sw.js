@@ -3,12 +3,12 @@
  * Gyors betöltés, offline működés és iPhone PWA támogatás.
  */
 
-const CACHE_NAME = '3dvexora-pwa-v1';
+const CACHE_NAME = '3dvexora-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css',
-  './js/app.js',
+  './css/style.css?v=3',
+  './js/app.js?v=3',
   './manifest.json',
   './assets/apple-touch-icon.png',
   './assets/icon-192.png',
@@ -44,13 +44,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Do not cache API requests via service worker cache
-  if (event.request.url.includes('/api/')) {
+  // Do not intercept API requests, GitHub API, or dynamic sync.json
+  const url = event.request.url;
+  if (url.includes('/api/') || url.includes('sync.json') || url.includes('api.github.com')) {
     return;
   }
 
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-cache' })
       .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
