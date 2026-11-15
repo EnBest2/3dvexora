@@ -1,7 +1,7 @@
 {
-  "studio": "3DVEXORA Studio",
-  "exported_at": "2026-11-15T12:11:59.553Z",
-  "device": "3DVEXORA PWA",
+  "studio": "3DVEXORA",
+  "exported_at": "2026-11-15T13:12:27.667207",
+  "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
     "studio_subtitle": "3D PRINTING STUDIO",
@@ -10,24 +10,37 @@
     "currency": "Ft",
     "printer_name": "Bambu Lab A1 + AMS Lite",
     "printer_avg_power_watts": 120,
-    "electricity_kwh_cost": 70,
-    "default_profit_margin_percent": 100,
-    "tax_rate_percent": 0,
+    "electricity_kwh_cost": 70.0,
+    "default_profit_margin_percent": 100.0,
+    "tax_rate_percent": 0.0,
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-15T12:45:09.935574"
+    "last_cloud_sync": "2026-11-15T13:03:22.559049"
   },
   "filaments": [
+    {
+      "id": 14,
+      "brand": "Alma",
+      "material": "Pla",
+      "color_name": "Alma",
+      "color_hex": "#000000",
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4980.0,
+      "remaining_g": 1000.0,
+      "notes": "",
+      "created_at": "2026-11-15 12:12:27",
+      "cost_per_gram": 4.98
+    },
     {
       "id": 10,
       "brand": "Alzament",
       "material": "PLA",
       "color_name": "Fehér Matt",
       "color_hex": "#ffffff",
-      "spool_weight_g": 1000,
-      "spool_price_huf": 4880,
-      "remaining_g": 1000,
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4880.0,
+      "remaining_g": 1000.0,
       "notes": "",
       "created_at": "2026-11-11 11:32:21",
       "cost_per_gram": 4.88
@@ -38,9 +51,9 @@
       "material": "PLA",
       "color_name": "Red Matt",
       "color_hex": "#ff0000",
-      "spool_weight_g": 1000,
-      "spool_price_huf": 4880,
-      "remaining_g": 1000,
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4880.0,
+      "remaining_g": 1000.0,
       "notes": "",
       "created_at": "2026-11-11 11:32:40",
       "cost_per_gram": 4.88
@@ -51,9 +64,9 @@
       "material": "PLA",
       "color_name": "Fekete Matt",
       "color_hex": "#0a0a0a",
-      "spool_weight_g": 1000,
-      "spool_price_huf": 4150,
-      "remaining_g": 1000,
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4150.0,
+      "remaining_g": 1000.0,
       "notes": "",
       "created_at": "2026-11-11 11:33:18",
       "cost_per_gram": 4.15
@@ -64,24 +77,12 @@
       "material": "PLA",
       "color_name": "Fekete Matt",
       "color_hex": "#000000",
-      "spool_weight_g": 1000,
-      "spool_price_huf": 4990,
-      "remaining_g": 1000,
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4990.0,
+      "remaining_g": 1000.0,
       "notes": "",
       "created_at": "2026-11-15 10:15:12",
       "cost_per_gram": 4.99
-    },
-    {
-      "id": 14,
-      "brand": "Alma",
-      "material": "Pla",
-      "color_name": "Alma",
-      "color_hex": "#000000",
-      "spool_weight_g": 1000,
-      "spool_price_huf": 4980,
-      "remaining_g": 1000,
-      "notes": "",
-      "cost_per_gram": 4.98
     }
   ],
   "projects": [
@@ -100,9 +101,9 @@
           "project_id": 8,
           "name": "GTALogo",
           "quantity": 1,
-          "print_hours": 6,
-          "print_minutes": 29,
-          "profit_margin_percent": 240,
+          "print_hours": 6.0,
+          "print_minutes": 29.0,
+          "profit_margin_percent": 240.0,
           "filament_assignments": [
             {
               "slot": 1,
@@ -192,12 +193,12 @@
               }
             ]
           },
-          "total_price_huf": 2511,
+          "total_price_huf": 2511.0,
           "items_on_plate": 1
         }
       ],
       "items_count": 1,
-      "total_price_huf": 2511
+      "total_price_huf": 2511.0
     },
     {
       "id": 7,
@@ -214,9 +215,9 @@
           "project_id": 7,
           "name": "cica3db.gcode",
           "quantity": 1,
-          "print_hours": 13,
-          "print_minutes": 52,
-          "profit_margin_percent": 100,
+          "print_hours": 13.0,
+          "print_minutes": 52.0,
+          "profit_margin_percent": 100.0,
           "filament_assignments": [
             {
               "slot": 1,
@@ -336,12 +337,12 @@
               }
             ]
           },
-          "total_price_huf": 593,
+          "total_price_huf": 593.0,
           "items_on_plate": 3
         }
       ],
       "items_count": 1,
-      "total_price_huf": 593
+      "total_price_huf": 593.0
     },
     {
       "id": 6,
@@ -358,9 +359,9 @@
           "project_id": 6,
           "name": "santa_cat_ams.gcode",
           "quantity": 1,
-          "print_hours": 18,
-          "print_minutes": 50,
-          "profit_margin_percent": 240,
+          "print_hours": 18.0,
+          "print_minutes": 50.0,
+          "profit_margin_percent": 240.0,
           "filament_assignments": [
             {
               "slot": 1,
@@ -480,12 +481,12 @@
               }
             ]
           },
-          "total_price_huf": 662,
+          "total_price_huf": 662.0,
           "items_on_plate": 6
         }
       ],
       "items_count": 1,
-      "total_price_huf": 662
+      "total_price_huf": 662.0
     },
     {
       "id": 3,
@@ -502,9 +503,9 @@
           "project_id": 3,
           "name": "Medve",
           "quantity": 1,
-          "print_hours": 5,
-          "print_minutes": 34,
-          "profit_margin_percent": 100,
+          "print_hours": 5.0,
+          "print_minutes": 34.0,
+          "profit_margin_percent": 100.0,
           "filament_assignments": [
             {
               "slot": 1,
@@ -604,12 +605,12 @@
               }
             ]
           },
-          "total_price_huf": 797,
+          "total_price_huf": 797.0,
           "items_on_plate": 1
         }
       ],
       "items_count": 1,
-      "total_price_huf": 797
+      "total_price_huf": 797.0
     }
   ],
   "sales": [
@@ -618,9 +619,9 @@
       "sale_date": "2026-11-15",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 1400,
-      "total_cost_huf": 594,
-      "profit_huf": 806,
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 594.0,
+      "profit_huf": 806.0,
       "profit_margin_percent": 135.69,
       "notes": "",
       "created_at": "2026-11-15 11:06:09",
@@ -632,9 +633,9 @@
           "project_id": 7,
           "item_name": "cica3db",
           "quantity": 2,
-          "unit_cost_huf": 297,
-          "total_cost_huf": 594,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 297.0,
+          "total_cost_huf": 594.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 2,
@@ -646,9 +647,9 @@
       "sale_date": "2026-11-14",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 900,
-      "total_cost_huf": 297,
-      "profit_huf": 603,
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 297.0,
+      "profit_huf": 603.0,
       "profit_margin_percent": 203.03,
       "notes": "",
       "created_at": "2026-11-14 19:12:15",
@@ -660,9 +661,9 @@
           "project_id": 7,
           "item_name": "cica3db",
           "quantity": 1,
-          "unit_cost_huf": 297,
-          "total_cost_huf": 297,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 297.0,
+          "total_cost_huf": 297.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 1,
@@ -674,9 +675,9 @@
       "sale_date": "2026-11-13",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 1400,
-      "total_cost_huf": 594,
-      "profit_huf": 806,
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 594.0,
+      "profit_huf": 806.0,
       "profit_margin_percent": 135.69,
       "notes": "cica maci",
       "created_at": "2026-11-14 19:08:25",
@@ -688,9 +689,9 @@
           "project_id": 6,
           "item_name": "santa_cat_ams.gcode",
           "quantity": 1,
-          "unit_cost_huf": 195,
-          "total_cost_huf": 195,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 195.0,
+          "unit_sale_price_huf": 0.0
         },
         {
           "id": 5,
@@ -698,9 +699,9 @@
           "project_id": 3,
           "item_name": "medve",
           "quantity": 1,
-          "unit_cost_huf": 399,
-          "total_cost_huf": 399,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 399.0,
+          "total_cost_huf": 399.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 2,
@@ -712,9 +713,9 @@
       "sale_date": "2026-11-13",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 1400,
-      "total_cost_huf": 390,
-      "profit_huf": 1010,
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 390.0,
+      "profit_huf": 1010.0,
       "profit_margin_percent": 258.97,
       "notes": "cica",
       "created_at": "2026-11-14 19:07:22",
@@ -726,9 +727,9 @@
           "project_id": 6,
           "item_name": "santa_cat_ams.gcode",
           "quantity": 2,
-          "unit_cost_huf": 195,
-          "total_cost_huf": 390,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 390.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 2,
@@ -740,9 +741,9 @@
       "sale_date": "2026-11-13",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 900,
-      "total_cost_huf": 195,
-      "profit_huf": 705,
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 195.0,
+      "profit_huf": 705.0,
       "profit_margin_percent": 361.54,
       "notes": "cica",
       "created_at": "2026-11-14 19:06:13",
@@ -754,9 +755,9 @@
           "project_id": 6,
           "item_name": "santa_cat_ams.gcode",
           "quantity": 1,
-          "unit_cost_huf": 195,
-          "total_cost_huf": 195,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 195.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 1,
@@ -768,9 +769,9 @@
       "sale_date": "2026-11-12",
       "buyer_name": "",
       "channel": "Vinted",
-      "total_sale_price_huf": 900,
-      "total_cost_huf": 399,
-      "profit_huf": 501,
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 399.0,
+      "profit_huf": 501.0,
       "profit_margin_percent": 125.56,
       "notes": "Medve",
       "created_at": "2026-11-14 19:05:15",
@@ -782,9 +783,9 @@
           "project_id": 3,
           "item_name": "medve",
           "quantity": 1,
-          "unit_cost_huf": 399,
-          "total_cost_huf": 399,
-          "unit_sale_price_huf": 0
+          "unit_cost_huf": 399.0,
+          "total_cost_huf": 399.0,
+          "unit_sale_price_huf": 0.0
         }
       ],
       "items_count": 1,
@@ -793,12 +794,12 @@
     }
   ],
   "summary": {
-    "total_revenue": 6900,
-    "total_cost": 2469,
-    "total_profit": 4431,
-    "avg_profit_margin_percent": 179.5,
-    "total_items_sold": 9,
     "total_sales_count": 6,
-    "avg_order_value": 1150
+    "total_revenue": 6900.0,
+    "total_cost": 2469.0,
+    "total_profit": 4431.0,
+    "total_items_sold": 9,
+    "avg_profit_margin_percent": 179.5,
+    "avg_order_value": 1150.0
   }
 }
