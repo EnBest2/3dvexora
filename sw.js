@@ -3,12 +3,12 @@
  * Gyors betöltés, offline működés és iPhone PWA támogatás.
  */
 
-const CACHE_NAME = '3dvexora-pwa-v4';
+const CACHE_NAME = '3dvexora-pwa-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './css/style.css?v=4',
-  './js/app.js?v=4',
+  './js/app.js?v=5',
   './manifest.json',
   './assets/apple-touch-icon.png',
   './assets/icon-192.png',
