@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#0B0C10">
   
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 
@@ -51,7 +51,7 @@
         </button>
       </nav>
 
-      <div style="display:flex; align-items:center; gap:8px;">
+      <div class="header-actions">
         <button type="button" class="btn btn-secondary btn-sm" onclick="showCloudSyncModal()" id="header-sync-btn" title="Felhőszinkronizáció állapota">
           ☁️ <span id="sync-status-text">Felhő Szinkron</span>
         </button>
@@ -473,8 +473,8 @@
           </div>
 
           <!-- Csomag / Tételek építője -->
-          <div style="background:var(--bg-dark); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin: 16px 0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div class="sale-builder-box">
+            <div class="sale-builder-top">
               <div style="font-weight:700; font-size:14px; color:var(--silver-primary); display:flex; align-items:center; gap:8px;">
                 <span>📦</span>
                 <span>Eladott Termékek & Önköltségek a Csomagban:</span>
@@ -485,7 +485,7 @@
             </div>
 
             <!-- Tételek fejléce -->
-            <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap:10px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; padding: 0 12px 6px 12px;">
+            <div class="sale-items-header">
               <div>Termék / Modell kiválasztása</div>
               <div>Darabszám (db)</div>
               <div>1 db Önköltség (Ft)</div>
@@ -500,14 +500,14 @@
           </div>
 
           <!-- Pénzügyi összefoglaló és eladási ár megadása -->
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:18px; background:var(--bg-card-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px; margin-top:14px; align-items:center;">
+          <div class="sale-summary-box">
             <div>
               <label style="font-size:14px; font-weight:700; color:var(--orange-primary); display:block; margin-bottom:6px;">
                 💰 Teljes Csomag / Eladási Ár (Bevétel):
               </label>
               <div style="display:flex; align-items:center; gap:8px;">
                 <input type="number" id="sale-total-price-input" min="0" step="1" required placeholder="pl. 1400" 
-                       style="font-size:20px; font-weight:900; color:var(--orange-primary); background:var(--bg-input); border:1px solid var(--orange-primary); border-radius:var(--radius-sm); padding:10px 14px; width:180px;"
+                       class="sale-total-input"
                        oninput="recalculateSaleForm()">
                 <span style="font-size:18px; font-weight:700; color:var(--text-muted);">Ft</span>
               </div>
@@ -551,13 +551,13 @@
           </div>
 
           <!-- Kereső és szűrők -->
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div class="sales-filter-bar">
             <input type="text" id="sales-search-input" placeholder="🔍 Keresés termékre, vevőre..." 
                    oninput="filterSalesTable()" 
-                   style="font-size:12px; padding:6px 12px; width:200px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main);">
+                   class="sales-filter-input">
             
             <select id="sales-period-select" onchange="filterSalesTable()"
-                    style="font-size:12px; padding:6px 10px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main);">
+                    style="font-size:12px; padding:6px 10px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main); width:auto;">
               <option value="all">📅 Minden időszak</option>
               <option value="this_month">📅 Ez a hónap</option>
               <option value="prev_month">📅 Előző hónap</option>
@@ -571,7 +571,7 @@
         </div>
 
         <!-- Táblázat konténer -->
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
           <table class="vexora-table" id="sales-main-table">
             <thead>
               <tr>
@@ -641,10 +641,10 @@
     <section id="tab-quote" class="tab-pane">
       <div class="card quote-actions no-print" style="margin-bottom:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
-          <div style="display:flex; gap:16px; align-items:center;">
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
             <div>
               <label>Szállítási Költség (Ft)</label>
-              <input type="number" id="quote-ship-cost" value="0" placeholder="pl. 1990" style="width:140px;" oninput="renderQuoteView()">
+              <input type="number" id="quote-ship-cost" value="0" placeholder="pl. 1990" style="width:140px; max-width:100%;" oninput="renderQuoteView()">
             </div>
           </div>
           <div style="display:flex; gap:10px;">
@@ -706,8 +706,8 @@
           <div style="font-weight:700; color:var(--orange-primary); margin-bottom:6px; font-size:13px;">
             🌐 Közvetlen Wi-Fi Hálózati Cím (ha a gép be van kapcsolva):
           </div>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="local-wifi-url" readonly style="flex:1; font-size:13px; font-weight:700; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:8px 10px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="local-wifi-url" readonly style="flex:1; min-width:0; font-size:13px; font-weight:700; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:8px 10px;">
             <button class="btn btn-secondary btn-sm" onclick="copyToClipboard(document.getElementById('local-wifi-url').value)">Másolás</button>
           </div>
         </div>
@@ -739,7 +739,7 @@
           A felhőszinkronizáció biztosítja, hogy a gépen lévő árak, filamentek és projektek azonnal megjelenjenek a telefonodon, és a telefonon rögzített eladások bekerüljenek a gép adatbázisába!
         </p>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card-secondary); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:var(--bg-card-secondary); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:14px;">
           <div>
             <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Szinkronizáció Állapota:</div>
             <strong id="sync-modal-status-text" style="color:var(--green); font-size:14px;">✅ Helyi adatbázis készen áll</strong>
@@ -769,6 +769,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=3"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>
