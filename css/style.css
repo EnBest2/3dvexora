@@ -64,6 +64,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .logo-brand {
@@ -770,7 +772,13 @@ input:focus, select:focus, textarea:focus {
   letter-spacing: -0.2px;
 }
 
+@media (max-width: 1280px) {
+  .printer-badge { display: none; }
+  .nav-btn { padding: 8px 11px; font-size: 12px; }
+}
+
 @media (max-width: 768px) {
+  .app-header { padding: 10px 14px; }
   .app-header .nav-tabs { display: none; }
   .mobile-bottom-nav { display: flex; }
   .app-main { padding-bottom: 75px !important; }
