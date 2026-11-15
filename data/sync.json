@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-15T12:37:54.444954",
+  "exported_at": "2026-11-15T12:44:44.526139",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
   },
   "filaments": [
     {
-      "id": 2,
+      "id": 10,
       "brand": "Alzament",
       "material": "PLA",
       "color_name": "Fehér Matt",
@@ -25,11 +25,11 @@
       "spool_price_huf": 4880.0,
       "remaining_g": 1000.0,
       "notes": "",
-      "created_at": "2026-11-12 09:05:25",
+      "created_at": "2026-11-11 11:32:21",
       "cost_per_gram": 4.88
     },
     {
-      "id": 1,
+      "id": 11,
       "brand": "Alzament",
       "material": "PLA",
       "color_name": "Red Matt",
@@ -38,39 +38,309 @@
       "spool_price_huf": 4880.0,
       "remaining_g": 1000.0,
       "notes": "",
-      "created_at": "2026-11-12 09:04:53",
+      "created_at": "2026-11-11 11:32:40",
       "cost_per_gram": 4.88
     },
     {
-      "id": 3,
+      "id": 12,
       "brand": "Elegoo",
       "material": "PLA",
       "color_name": "Fekete Matt",
-      "color_hex": "#000000",
+      "color_hex": "#0a0a0a",
       "spool_weight_g": 1000.0,
       "spool_price_huf": 4150.0,
       "remaining_g": 1000.0,
       "notes": "",
-      "created_at": "2026-11-12 09:05:57",
+      "created_at": "2026-11-11 11:33:18",
       "cost_per_gram": 4.15
+    },
+    {
+      "id": 13,
+      "brand": "Flashforge",
+      "material": "PLA",
+      "color_name": "Fekete Matt",
+      "color_hex": "#000000",
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4990.0,
+      "remaining_g": 1000.0,
+      "notes": "",
+      "created_at": "2026-11-15 10:15:12",
+      "cost_per_gram": 4.99
     }
   ],
   "projects": [
     {
-      "id": 1,
-      "project_name": "Cica",
-      "client_name": "Péter",
+      "id": 8,
+      "project_name": "GTALogo",
+      "client_name": "",
       "client_contact": "",
       "notes": "",
       "status": "Mentve",
-      "created_at": "2026-11-12 09:22:02",
-      "updated_at": "2026-11-12 09:22:02",
+      "created_at": "2026-11-15 10:16:30",
+      "updated_at": "2026-11-15 10:16:30",
       "items": [
         {
-          "id": 1,
-          "project_id": 1,
-          "name": "Cica",
-          "items_on_plate": 6,
+          "id": 9,
+          "project_id": 8,
+          "name": "GTALogo",
+          "quantity": 1,
+          "print_hours": 6.0,
+          "print_minutes": 29.0,
+          "profit_margin_percent": 240.0,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 13,
+              "grams": 96.8
+            },
+            {
+              "slot": 2,
+              "filament_id": 10,
+              "grams": 41.2
+            },
+            {
+              "slot": 3,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 4,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 5,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 1,
+            "quantity": 1,
+            "unit_grams": 138,
+            "unit_time_formatted": "6ó 29p",
+            "unit_material_cost": 684,
+            "unit_electricity_cost": 54,
+            "unit_net_cost": 738,
+            "unit_profit": 1772,
+            "unit_sale_price": 2511,
+            "total_grams": 138,
+            "total_print_hours": 6.48,
+            "print_time_formatted": "6ó 29p",
+            "plate_time_formatted": "6ó 29p",
+            "total_kwh_used": 0.778,
+            "total_material_cost": 684,
+            "total_electricity_cost": 54,
+            "total_net_cost": 738,
+            "total_profit": 1772,
+            "total_price": 2511,
+            "cost_percentages": {
+              "material": 92.6,
+              "electricity": 7.4
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 13,
+                "name": "Flashforge PLA (Fekete Matt)",
+                "color_hex": "#000000",
+                "plate_grams": 96.8,
+                "unit_grams": 96.8,
+                "cost_per_g": 4.99,
+                "slot_cost_plate": 483
+              },
+              {
+                "slot": 2,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 41.2,
+                "unit_grams": 41.2,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 201.1
+              }
+            ]
+          },
+          "total_price_huf": 2511.0,
+          "items_on_plate": 1
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 2511.0
+    },
+    {
+      "id": 7,
+      "project_name": "cica3db",
+      "client_name": "",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-14 19:11:33",
+      "updated_at": "2026-11-14 19:11:33",
+      "items": [
+        {
+          "id": 8,
+          "project_id": 7,
+          "name": "cica3db.gcode",
+          "quantity": 1,
+          "print_hours": 13.0,
+          "print_minutes": 52.0,
+          "profit_margin_percent": 100.0,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 10,
+              "grams": 113.6
+            },
+            {
+              "slot": 2,
+              "filament_id": 11,
+              "grams": 21.2
+            },
+            {
+              "slot": 3,
+              "filament_id": 10,
+              "grams": 16.8
+            },
+            {
+              "slot": 4,
+              "filament_id": 12,
+              "grams": 6
+            },
+            {
+              "slot": 5,
+              "filament_id": 12,
+              "grams": 2.1
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 3,
+            "quantity": 1,
+            "unit_grams": 53.23,
+            "unit_time_formatted": "4ó 37p",
+            "unit_material_cost": 258,
+            "unit_electricity_cost": 39,
+            "unit_net_cost": 297,
+            "unit_profit": 297,
+            "unit_sale_price": 593,
+            "total_grams": 53.2,
+            "total_print_hours": 4.62,
+            "print_time_formatted": "4ó 37p",
+            "plate_time_formatted": "13ó 52p",
+            "total_kwh_used": 0.555,
+            "total_material_cost": 258,
+            "total_electricity_cost": 39,
+            "total_net_cost": 297,
+            "total_profit": 297,
+            "total_price": 593,
+            "cost_percentages": {
+              "material": 86.9,
+              "electricity": 13.1
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 113.6,
+                "unit_grams": 37.87,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 554.4
+              },
+              {
+                "slot": 2,
+                "filament_id": 11,
+                "name": "Alzament PLA (Red Matt)",
+                "color_hex": "#ff0000",
+                "plate_grams": 21.2,
+                "unit_grams": 7.07,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 103.5
+              },
+              {
+                "slot": 3,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 16.8,
+                "unit_grams": 5.6,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 82
+              },
+              {
+                "slot": 4,
+                "filament_id": 12,
+                "name": "Elegoo PLA (Fekete Matt)",
+                "color_hex": "#0a0a0a",
+                "plate_grams": 6,
+                "unit_grams": 2,
+                "cost_per_g": 4.15,
+                "slot_cost_plate": 24.9
+              },
+              {
+                "slot": 5,
+                "filament_id": 12,
+                "name": "Elegoo PLA (Fekete Matt)",
+                "color_hex": "#0a0a0a",
+                "plate_grams": 2.1,
+                "unit_grams": 0.7,
+                "cost_per_g": 4.15,
+                "slot_cost_plate": 8.7
+              }
+            ]
+          },
+          "total_price_huf": 593.0,
+          "items_on_plate": 3
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 593.0
+    },
+    {
+      "id": 6,
+      "project_name": "santa_cat_ams.gcode",
+      "client_name": "",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-12 11:38:54",
+      "updated_at": "2026-11-12 11:38:54",
+      "items": [
+        {
+          "id": 7,
+          "project_id": 6,
+          "name": "santa_cat_ams.gcode",
           "quantity": 1,
           "print_hours": 18.0,
           "print_minutes": 50.0,
@@ -78,27 +348,27 @@
           "filament_assignments": [
             {
               "slot": 1,
-              "filament_id": 2,
+              "filament_id": 10,
               "grams": 150.5
             },
             {
               "slot": 2,
-              "filament_id": 1,
+              "filament_id": 11,
               "grams": 26.9
             },
             {
               "slot": 3,
-              "filament_id": 2,
+              "filament_id": 10,
               "grams": 22.1
             },
             {
               "slot": 4,
-              "filament_id": 2,
+              "filament_id": 12,
               "grams": 6.6
             },
             {
               "slot": 5,
-              "filament_id": 2,
+              "filament_id": 12,
               "grams": 2.1
             },
             {
@@ -122,21 +392,21 @@
             "quantity": 1,
             "unit_grams": 34.7,
             "unit_time_formatted": "3ó 8p",
-            "unit_material_cost": 169,
+            "unit_material_cost": 168,
             "unit_electricity_cost": 26,
-            "unit_net_cost": 196,
-            "unit_profit": 470,
-            "unit_sale_price": 665,
+            "unit_net_cost": 195,
+            "unit_profit": 467,
+            "unit_sale_price": 662,
             "total_grams": 34.7,
             "total_print_hours": 3.14,
             "print_time_formatted": "3ó 8p",
             "plate_time_formatted": "18ó 50p",
             "total_kwh_used": 0.377,
-            "total_material_cost": 169,
+            "total_material_cost": 168,
             "total_electricity_cost": 26,
-            "total_net_cost": 196,
-            "total_profit": 470,
-            "total_price": 665,
+            "total_net_cost": 195,
+            "total_profit": 467,
+            "total_price": 662,
             "cost_percentages": {
               "material": 86.5,
               "electricity": 13.5
@@ -144,7 +414,7 @@
             "filaments": [
               {
                 "slot": 1,
-                "filament_id": 2,
+                "filament_id": 10,
                 "name": "Alzament PLA (Fehér Matt)",
                 "color_hex": "#ffffff",
                 "plate_grams": 150.5,
@@ -154,7 +424,7 @@
               },
               {
                 "slot": 2,
-                "filament_id": 1,
+                "filament_id": 11,
                 "name": "Alzament PLA (Red Matt)",
                 "color_hex": "#ff0000",
                 "plate_grams": 26.9,
@@ -164,7 +434,7 @@
               },
               {
                 "slot": 3,
-                "filament_id": 2,
+                "filament_id": 10,
                 "name": "Alzament PLA (Fehér Matt)",
                 "color_hex": "#ffffff",
                 "plate_grams": 22.1,
@@ -174,41 +444,345 @@
               },
               {
                 "slot": 4,
-                "filament_id": 2,
-                "name": "Alzament PLA (Fehér Matt)",
-                "color_hex": "#ffffff",
+                "filament_id": 12,
+                "name": "Elegoo PLA (Fekete Matt)",
+                "color_hex": "#0a0a0a",
                 "plate_grams": 6.6,
                 "unit_grams": 1.1,
-                "cost_per_g": 4.88,
-                "slot_cost_plate": 32.2
+                "cost_per_g": 4.15,
+                "slot_cost_plate": 27.4
               },
               {
                 "slot": 5,
-                "filament_id": 2,
-                "name": "Alzament PLA (Fehér Matt)",
-                "color_hex": "#ffffff",
+                "filament_id": 12,
+                "name": "Elegoo PLA (Fekete Matt)",
+                "color_hex": "#0a0a0a",
                 "plate_grams": 2.1,
                 "unit_grams": 0.35,
-                "cost_per_g": 4.88,
-                "slot_cost_plate": 10.2
+                "cost_per_g": 4.15,
+                "slot_cost_plate": 8.7
               }
             ]
           },
-          "total_price_huf": 665.0
+          "total_price_huf": 662.0,
+          "items_on_plate": 6
         }
       ],
       "items_count": 1,
-      "total_price_huf": 665.0
+      "total_price_huf": 662.0
+    },
+    {
+      "id": 3,
+      "project_name": "medve",
+      "client_name": "Péter",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-12 10:48:18",
+      "updated_at": "2026-11-12 10:48:59",
+      "items": [
+        {
+          "id": 4,
+          "project_id": 3,
+          "name": "Medve",
+          "quantity": 1,
+          "print_hours": 5.0,
+          "print_minutes": 34.0,
+          "profit_margin_percent": 100.0,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 10,
+              "grams": 57
+            },
+            {
+              "slot": 2,
+              "filament_id": 11,
+              "grams": 9.7
+            },
+            {
+              "slot": 3,
+              "filament_id": 10,
+              "grams": 5.4
+            },
+            {
+              "slot": 4,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 5,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 1,
+            "quantity": 1,
+            "unit_grams": 72.1,
+            "unit_time_formatted": "5ó 34p",
+            "unit_material_cost": 352,
+            "unit_electricity_cost": 47,
+            "unit_net_cost": 399,
+            "unit_profit": 399,
+            "unit_sale_price": 797,
+            "total_grams": 72.1,
+            "total_print_hours": 5.57,
+            "print_time_formatted": "5ó 34p",
+            "plate_time_formatted": "5ó 34p",
+            "total_kwh_used": 0.668,
+            "total_material_cost": 352,
+            "total_electricity_cost": 47,
+            "total_net_cost": 399,
+            "total_profit": 399,
+            "total_price": 797,
+            "cost_percentages": {
+              "material": 88.3,
+              "electricity": 11.7
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 57,
+                "unit_grams": 57,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 278.2
+              },
+              {
+                "slot": 2,
+                "filament_id": 11,
+                "name": "Alzament PLA (Red Matt)",
+                "color_hex": "#ff0000",
+                "plate_grams": 9.7,
+                "unit_grams": 9.7,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 47.3
+              },
+              {
+                "slot": 3,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 5.4,
+                "unit_grams": 5.4,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 26.4
+              }
+            ]
+          },
+          "total_price_huf": 797.0,
+          "items_on_plate": 1
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 797.0
     }
   ],
-  "sales": [],
+  "sales": [
+    {
+      "id": 8,
+      "sale_date": "2026-11-15",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 594.0,
+      "profit_huf": 806.0,
+      "profit_margin_percent": 135.69,
+      "notes": "",
+      "created_at": "2026-11-15 11:06:09",
+      "updated_at": "2026-11-15 11:06:09",
+      "items": [
+        {
+          "id": 9,
+          "sale_id": 8,
+          "project_id": 7,
+          "item_name": "cica3db",
+          "quantity": 2,
+          "unit_cost_huf": 297.0,
+          "total_cost_huf": 594.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 2,
+      "items_summary": "2x cica3db",
+      "is_bundle": true
+    },
+    {
+      "id": 6,
+      "sale_date": "2026-11-14",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 297.0,
+      "profit_huf": 603.0,
+      "profit_margin_percent": 203.03,
+      "notes": "",
+      "created_at": "2026-11-14 19:12:15",
+      "updated_at": "2026-11-14 19:12:15",
+      "items": [
+        {
+          "id": 7,
+          "sale_id": 6,
+          "project_id": 7,
+          "item_name": "cica3db",
+          "quantity": 1,
+          "unit_cost_huf": 297.0,
+          "total_cost_huf": 297.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 1,
+      "items_summary": "1x cica3db",
+      "is_bundle": false
+    },
+    {
+      "id": 4,
+      "sale_date": "2026-11-13",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 594.0,
+      "profit_huf": 806.0,
+      "profit_margin_percent": 135.69,
+      "notes": "cica maci",
+      "created_at": "2026-11-14 19:08:25",
+      "updated_at": "2026-11-14 19:08:25",
+      "items": [
+        {
+          "id": 4,
+          "sale_id": 4,
+          "project_id": 6,
+          "item_name": "santa_cat_ams.gcode",
+          "quantity": 1,
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 195.0,
+          "unit_sale_price_huf": 0.0
+        },
+        {
+          "id": 5,
+          "sale_id": 4,
+          "project_id": 3,
+          "item_name": "medve",
+          "quantity": 1,
+          "unit_cost_huf": 399.0,
+          "total_cost_huf": 399.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 2,
+      "items_summary": "1x santa_cat_ams.gcode, 1x medve",
+      "is_bundle": true
+    },
+    {
+      "id": 3,
+      "sale_date": "2026-11-13",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 1400.0,
+      "total_cost_huf": 390.0,
+      "profit_huf": 1010.0,
+      "profit_margin_percent": 258.97,
+      "notes": "cica",
+      "created_at": "2026-11-14 19:07:22",
+      "updated_at": "2026-11-14 19:07:22",
+      "items": [
+        {
+          "id": 3,
+          "sale_id": 3,
+          "project_id": 6,
+          "item_name": "santa_cat_ams.gcode",
+          "quantity": 2,
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 390.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 2,
+      "items_summary": "2x santa_cat_ams.gcode",
+      "is_bundle": true
+    },
+    {
+      "id": 2,
+      "sale_date": "2026-11-13",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 195.0,
+      "profit_huf": 705.0,
+      "profit_margin_percent": 361.54,
+      "notes": "cica",
+      "created_at": "2026-11-14 19:06:13",
+      "updated_at": "2026-11-14 19:06:13",
+      "items": [
+        {
+          "id": 2,
+          "sale_id": 2,
+          "project_id": 6,
+          "item_name": "santa_cat_ams.gcode",
+          "quantity": 1,
+          "unit_cost_huf": 195.0,
+          "total_cost_huf": 195.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 1,
+      "items_summary": "1x santa_cat_ams.gcode",
+      "is_bundle": false
+    },
+    {
+      "id": 1,
+      "sale_date": "2026-11-12",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 399.0,
+      "profit_huf": 501.0,
+      "profit_margin_percent": 125.56,
+      "notes": "Medve",
+      "created_at": "2026-11-14 19:05:15",
+      "updated_at": "2026-11-14 19:05:15",
+      "items": [
+        {
+          "id": 1,
+          "sale_id": 1,
+          "project_id": 3,
+          "item_name": "medve",
+          "quantity": 1,
+          "unit_cost_huf": 399.0,
+          "total_cost_huf": 399.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 1,
+      "items_summary": "1x medve",
+      "is_bundle": false
+    }
+  ],
   "summary": {
-    "total_sales_count": 0,
-    "total_revenue": 0.0,
-    "total_cost": 0.0,
-    "total_profit": 0.0,
-    "total_items_sold": 0,
-    "avg_profit_margin_percent": 0.0,
-    "avg_order_value": 0.0
+    "total_sales_count": 6,
+    "total_revenue": 6900.0,
+    "total_cost": 2469.0,
+    "total_profit": 4431.0,
+    "total_items_sold": 9,
+    "avg_profit_margin_percent": 179.5,
+    "avg_order_value": 1150.0
   }
 }
