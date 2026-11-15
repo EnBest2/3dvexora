@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>3DVEXORA - 3D Printing Studio Árazó Rendszer | Bambu Lab A1</title>
+  
+  <!-- PWA & Mobile Meta Tags (iOS / iPhone) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="3DVEXORA">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#0B0C10">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-brand">
+        <img src="assets/apple-touch-icon.png" alt="3DVEXORA Logo">
+        <div class="brand-text">
+          <h1>3D<span>VEXORA</span></h1>
+          <p>3D PRINTING STUDIO</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="tab-calc">
+          🎯 Kalkulátor
+        </button>
+        <button class="nav-btn" data-tab="tab-filaments">
+          🧵 Filamentjeim
+        </button>
+        <button class="nav-btn" data-tab="tab-history">
+          📂 Mentett Projektek
+        </button>
+        <button class="nav-btn" data-tab="tab-sales">
+          💰 Eladásaim & Profit
+        </button>
+        <button class="nav-btn" data-tab="tab-settings">
+          ⚙️ Beállítások
+        </button>
+        <button class="nav-btn" data-tab="tab-quote">
+          📑 Árajánlat
+        </button>
+      </nav>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="showCloudSyncModal()" id="header-sync-btn" title="Felhőszinkronizáció állapota">
+          ☁️ <span id="sync-status-text">Felhő Szinkron</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="showMobileConnectModal()" title="Megnyitás telefonon QR kóddal vagy PWA-ként">
+          📱 Mobil / PWA
+        </button>
+        <div class="printer-badge">
+          <span class="pulse-dot"></span>
+          <span>Bambu Lab A1 • Dual AMS (8 Slot)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="app-main">
+
+    <!-- TAB 1: KALKULÁTOR -->
+    <section id="tab-calc" class="tab-pane active">
+      <div class="calculator-grid">
+        
+        <!-- Bal oldal: Adatbevitel és AMS slotok -->
+        <div class="calc-main-column">
+          
+          <!-- Bambu Studio Drag & Drop Zone -->
+          <div class="dropzone" id="bambu-dropzone">
+            <input type="file" id="bambu-file-input" accept=".3mf,.gcode" style="display:none;">
+            <div class="dropzone-icon">🚀</div>
+            <div>
+              <h4 id="dropzone-status-text" style="color:var(--silver-primary); font-size:15px; margin-bottom:4px;">
+                Bambu Studio .3mf vagy .gcode Gyors-Import
+              </h4>
+              <p style="color:var(--text-muted); font-size:12px;">
+                Húzd ide a szeletelt fájlt a nyomtatási idő, anyagsúly és darabszám azonnali kiolvasásához!
+              </p>
+            </div>
+          </div>
+
+          <!-- Projekt és Modell adatok -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div class="card-title">
+                <span>📋</span>
+                <span>Projekt & Modell Alapadatok</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="startNewCalculation()" title="Űrlap nullázása új számításhoz" style="padding:6px 12px; font-size:12px;">
+                ✨ Új Kalkuláció
+              </button>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Projekt Megnevezése</label>
+                <input type="text" id="project-name" value="Új Nyomtatási Projekt" placeholder="pl. Egyedi Kulcstartó">
+              </div>
+              <div class="form-group">
+                <label>Megrendelő Neve</label>
+                <input type="text" id="client-name" placeholder="pl. Minta Péter">
+              </div>
+              <div class="form-group">
+                <label>Modell Neve</label>
+                <input type="text" id="item-name" value="Modell 1">
+              </div>
+            </div>
+
+            <!-- Tálca és Darabszám szekció (Világos, precíz +/- léptetőkkel) -->
+            <div class="form-row" style="margin-top:10px;">
+              <div class="form-group">
+                <label>Tálca Nyomtatási Idő (Óra)</label>
+                <input type="number" id="item-hours" min="0" value="2">
+              </div>
+              <div class="form-group">
+                <label>Tálca Nyomtatási Idő (Perc)</label>
+                <input type="number" id="item-minutes" min="0" max="59" value="30">
+              </div>
+              
+              <!-- Tálcán lévő darabszám -->
+              <div class="form-group">
+                <label style="color:var(--orange-primary);">⚡ Tálcán készülő db</label>
+                <div class="stepper-control">
+                  <button type="button" class="stepper-btn" onclick="stepDown('item-plate-qty')">−</button>
+                  <input type="number" id="item-plate-qty" min="1" value="1" class="stepper-input">
+                  <button type="button" class="stepper-btn" onclick="stepUp('item-plate-qty')">+</button>
+                </div>
+                <small style="color:var(--text-dim); font-size:11px;">Hány db van a szeletelt tálcán?</small>
+              </div>
+
+              <!-- Megrendelt darabszám -->
+              <div class="form-group">
+                <label style="color:var(--green);">📦 Eladandó / Rendelt db</label>
+                <div class="stepper-control">
+                  <button type="button" class="stepper-btn" onclick="stepDown('item-qty')">−</button>
+                  <input type="number" id="item-qty" min="1" value="1" class="stepper-input">
+                  <button type="button" class="stepper-btn" onclick="stepUp('item-qty')">+</button>
+                </div>
+                <small style="color:var(--text-dim); font-size:11px;">Hány darabot számlázol a vevőnek?</small>
+              </div>
+
+              <!-- Haszonkulcs -->
+              <div class="form-group">
+                <label>Haszonkulcs (%)</label>
+                <div class="stepper-control">
+                  <button type="button" class="stepper-btn" onclick="stepDown('item-profit', 10)">−</button>
+                  <input type="number" id="item-profit" min="0" value="100" class="stepper-input">
+                  <button type="button" class="stepper-btn" onclick="stepUp('item-profit', 10)">+</button>
+                </div>
+                <small style="color:var(--text-dim); font-size:11px;">+100% = az önköltség kétszerese</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- AMS 8 Slot Kiosztás -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span>🎨</span>
+                <span>AMS Multi-Filament Kiosztás (8 Slot)</span>
+              </div>
+              <span style="font-size:12px; color:var(--text-muted);">
+                A Bambu Studio által kiírt teljes grammokat írd be (öblítés és torony benne van!)
+              </span>
+            </div>
+
+            <!-- AMS 1. egység (Slot 1-4) -->
+            <div class="ams-container">
+              <div class="ams-unit-title">
+                <span class="slot-tag">AMS #1</span>
+                <span>1. EGYSÉG (SLOT 1 – 4)</span>
+              </div>
+              <div class="ams-slots-grid-8" id="ams-unit-1-container">
+                <!-- Slot 1-4 ide generálódik -->
+              </div>
+            </div>
+
+            <!-- AMS 2. egység (Slot 5-8) -->
+            <div class="ams-container" style="margin-bottom:0;">
+              <div class="ams-unit-title">
+                <span class="slot-tag">AMS #2</span>
+                <span>2. EGYSÉG (SLOT 5 – 8)</span>
+              </div>
+              <div class="ams-slots-grid-8" id="ams-unit-2-container">
+                <!-- Slot 5-8 ide generálódik -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Jobb oldal: Élő Összegző & Mentés -->
+        <div class="calc-sidebar-column">
+          <div class="summary-card">
+            
+            <div class="price-display-box">
+              <div class="price-label">Javasolt Eladási Ár (Végösszeg)</div>
+              <div class="grand-price" id="sidebar-grand-price">0 Ft</div>
+              <div class="unit-price-badge" id="sidebar-unit-price">
+                0 Ft / db
+              </div>
+              <div class="cost-profit-pills">
+                <span class="pill pill-cost" id="sidebar-cost-pill">1 db önköltség: 0 Ft</span>
+                <span class="pill pill-profit" id="sidebar-profit-pill">Haszon: +0 Ft</span>
+              </div>
+            </div>
+
+            <!-- Progress Bar Anyag vs Áram -->
+            <div class="breakdown-bar-container">
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-bottom:4px; font-weight:700;">
+                <span>Önköltség megoszlás</span>
+                <span>Anyag • Áram</span>
+              </div>
+              <div class="multi-progress-bar">
+                <div class="bar-segment bar-material" id="bar-material" style="width: 80%;"></div>
+                <div class="bar-segment bar-elec" id="bar-elec" style="width: 20%;"></div>
+              </div>
+            </div>
+
+            <!-- Tételes Költségek -->
+            <ul class="cost-list">
+              <li class="cost-list-item">
+                <span><span class="color-dot" style="background:#FF6E00;"></span> 🧵 Filament anyagköltség:</span>
+                <span id="cost-material" style="color:var(--orange-primary); font-weight:700;">0 Ft</span>
+              </li>
+              <li class="cost-list-item">
+                <span><span class="color-dot" style="background:#38BDF8;"></span> ⚡ Bambu A1 Áramdíj:</span>
+                <span id="cost-electricity" style="color:var(--blue); font-weight:700;">0 Ft</span>
+              </li>
+              <li class="cost-list-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top:10px; margin-top:4px;">
+                <span><strong>📦 Tiszta bekerülési ár:</strong></span>
+                <strong id="cost-total-net" style="color:var(--silver-primary);">0 Ft</strong>
+              </li>
+              <li class="cost-list-item">
+                <span><span class="color-dot" style="background:#10B981;"></span> 💰 Tervezett Nyereség:</span>
+                <span id="cost-profit" style="color:var(--green); font-weight:700;">+0 Ft</span>
+              </li>
+            </ul>
+
+            <!-- Műszaki Összegző -->
+            <div style="background:var(--bg-input); padding: 12px; border-radius:var(--radius-sm); font-size:12px; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span style="color:var(--text-muted);">Összes anyagsúly:</span>
+                <strong id="stat-total-grams">0 g</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span style="color:var(--text-muted);">Gyártási időtartam:</span>
+                <strong id="stat-print-time">0ó 0p</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text-muted);">Becsült áramfogyasztás:</span>
+                <strong id="stat-kwh">0 kWh</strong>
+              </div>
+            </div>
+
+            <!-- Gombok -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div id="project-active-badge" style="display:none; padding:8px 12px; background:rgba(255, 110, 0, 0.12); border:1px solid var(--orange-primary); border-radius:6px; font-size:12px; color:var(--orange-primary); text-align:center;">
+                📂 Megnyitva: <strong id="project-active-name"></strong>
+              </div>
+              <button class="btn btn-primary" id="btn-save-project" style="width:100%; font-size:15px; padding:12px;">
+                💾 Projekt Mentése
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-save-as-new" onclick="saveProjectToDb(true)" style="display:none; width:100%; font-size:13px; padding:10px; background:#1e293b; border:1px solid #334155; color:#cbd5e1;">
+                ➕ Mentés Új Másolatként
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="startNewCalculation()" style="width:100%; font-size:13px; padding:10px;">
+                ✨ Új Kalkuláció Kezdése
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="document.querySelector('.nav-btn[data-tab=\'tab-quote\']').click();" style="width:100%;">
+                📑 Árajánlat Megtekintése
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: FILAMENTJEIM -->
+    <section id="tab-filaments" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>➕</span>
+            <span>Új Filament Rögzítése a Készletbe</span>
+          </div>
+        </div>
+
+        <form onsubmit="addFilamentSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Gyártó / Márka</label>
+              <input type="text" name="brand" placeholder="pl. Bambu Lab, Sunlu, eSUN" required>
+            </div>
+            <div class="form-group">
+              <label>Anyagtípus</label>
+              <input type="text" name="material" placeholder="pl. PLA Basic, PETG, TPU, Silk" required>
+            </div>
+            <div class="form-group">
+              <label>Szín Megnevezése</label>
+              <input type="text" name="color_name" placeholder="pl. Bambu Narancs, Mélyfekete" required>
+            </div>
+            <div class="form-group">
+              <label>Színminta (Színkód)</label>
+              <input type="color" name="color_hex" value="#FF6E00" style="height:42px; padding:2px; cursor:pointer;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tekercs Beszerzési Ára (Ft)</label>
+              <input type="number" name="spool_price_huf" min="500" step="10" placeholder="pl. 8490" required>
+            </div>
+            <div class="form-group">
+              <label>Tekercs Súlya (gramm)</label>
+              <input type="number" name="spool_weight_g" min="100" step="50" value="1000" required>
+            </div>
+            <div class="form-group">
+              <label>Készleten lévő mennyiség (g)</label>
+              <input type="number" name="remaining_g" min="0" value="1000">
+            </div>
+            <div class="form-group">
+              <label>Megjegyzés / RFID</label>
+              <input type="text" name="notes" placeholder="pl. Bambu RFID">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary">
+              💾 Filament Mentése a Készletbe
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Filament Táblázat -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🧵</span>
+            <span>Készleten Lévő Filamentjeid</span>
+          </div>
+          <span class="slot-tag" id="filament-count-badge">0 db filament</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="vexora-table">
+            <thead>
+              <tr>
+                <th>Szín & Név</th>
+                <th>Márka</th>
+                <th>Anyag</th>
+                <th>Tekercs Ár</th>
+                <th>Súly</th>
+                <th>Gramm-ár</th>
+                <th>Készlet</th>
+                <th>Művelet</th>
+              </tr>
+            </thead>
+            <tbody id="filament-table-body">
+              <!-- JS generálja -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: MENTETT PROJEKTEK -->
+    <section id="tab-history" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📂</span>
+            <span>Elmentett Kalkulációk & Projektek</span>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">Kattints a "Megnyitás" gombra az azonnali újratöltéshez!</span>
+        </div>
+
+        <div id="projects-history-list">
+          <!-- JS generálja -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ELADÁSAIM & PROFIT KÖVETÉS -->
+    <section id="tab-sales" class="tab-pane">
+      
+      <!-- KPI Összesítő Kártyák -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-revenue">
+          <div class="kpi-title">💵 Összes Bevétel</div>
+          <div class="kpi-value" id="kpi-revenue">0 Ft</div>
+          <div class="kpi-sub" id="kpi-avg-order">Átlagos rendelés: 0 Ft</div>
+        </div>
+
+        <div class="kpi-card kpi-cost">
+          <div class="kpi-title">⚙️ Összes Gyártási Költség</div>
+          <div class="kpi-value" id="kpi-cost">0 Ft</div>
+          <div class="kpi-sub">Csak filament és áram!</div>
+        </div>
+
+        <div class="kpi-card kpi-profit">
+          <div class="kpi-title">🚀 Tiszta Haszon (Profit)</div>
+          <div class="kpi-value profit-green" id="kpi-profit">+0 Ft</div>
+          <div class="kpi-sub">Bevétel levonva a gyártási költséget</div>
+        </div>
+
+        <div class="kpi-card kpi-margin">
+          <div class="kpi-title">📈 Átlagos Haszonkulcs</div>
+          <div class="kpi-value" id="kpi-margin">0%</div>
+          <div class="kpi-sub">Átlagos árrés a költségekre</div>
+        </div>
+
+        <div class="kpi-card kpi-items">
+          <div class="kpi-title">📦 Eladott Termékek</div>
+          <div class="kpi-value" id="kpi-items">0 db</div>
+          <div class="kpi-sub" id="kpi-sales-count">0 db tranzakcióban</div>
+        </div>
+      </div>
+
+      <!-- Új Eladás / Csomag Rögzítése Kártya -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="card-title">
+            <span>➕</span>
+            <span>Új Eladás / Csomag Rögzítése</span>
+          </div>
+          <span style="font-size:12px; color:var(--orange-primary);">
+            💡 Akár több különböző modellt is árulhatsz együtt csomagban!
+          </span>
+        </div>
+
+        <form id="sale-record-form" onsubmit="handleSaleSubmit(event)">
+          <!-- Alapadatok -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Eladás Dátuma</label>
+              <input type="date" id="sale-date" required>
+            </div>
+            <div class="form-group">
+              <label>Vevő Neve (opcionális)</label>
+              <input type="text" id="sale-buyer-name" placeholder="pl. Kovács Tamás">
+            </div>
+            <div class="form-group">
+              <label>Értékesítési Csatorna</label>
+              <select id="sale-channel">
+                <option value="Vinted">Vinted</option>
+                <option value="Facebook Marketplace">Facebook Marketplace</option>
+                <option value="Jófogás">Jófogás</option>
+                <option value="Személyes / Ismerős">Személyes / Ismerős</option>
+                <option value="TikTok / Instagram">TikTok / Instagram</option>
+                <option value="Webshop">Webshop</option>
+                <option value="Egyéb">Egyéb</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Megjegyzés</label>
+              <input type="text" id="sale-notes" placeholder="pl. Cica + Medve csomag akció">
+            </div>
+          </div>
+
+          <!-- Csomag / Tételek építője -->
+          <div style="background:var(--bg-dark); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin: 16px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="font-weight:700; font-size:14px; color:var(--silver-primary); display:flex; align-items:center; gap:8px;">
+                <span>📦</span>
+                <span>Eladott Termékek & Önköltségek a Csomagban:</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addSaleItemRow()">
+                ➕ További Termék Hozzáadása
+              </button>
+            </div>
+
+            <!-- Tételek fejléce -->
+            <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap:10px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; padding: 0 12px 6px 12px;">
+              <div>Termék / Modell kiválasztása</div>
+              <div>Darabszám (db)</div>
+              <div>1 db Önköltség (Ft)</div>
+              <div style="text-align:right;">Sor Költsége (Ft)</div>
+              <div></div>
+            </div>
+
+            <!-- Dinamikus tételek konténer -->
+            <div id="sale-items-builder-list">
+              <!-- JS adja hozzá a sorokat -->
+            </div>
+          </div>
+
+          <!-- Pénzügyi összefoglaló és eladási ár megadása -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:18px; background:var(--bg-card-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:18px; margin-top:14px; align-items:center;">
+            <div>
+              <label style="font-size:14px; font-weight:700; color:var(--orange-primary); display:block; margin-bottom:6px;">
+                💰 Teljes Csomag / Eladási Ár (Bevétel):
+              </label>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" id="sale-total-price-input" min="0" step="1" required placeholder="pl. 1400" 
+                       style="font-size:20px; font-weight:900; color:var(--orange-primary); background:var(--bg-input); border:1px solid var(--orange-primary); border-radius:var(--radius-sm); padding:10px 14px; width:180px;"
+                       oninput="recalculateSaleForm()">
+                <span style="font-size:18px; font-weight:700; color:var(--text-muted);">Ft</span>
+              </div>
+              <span style="font-size:12px; color:var(--text-muted); margin-top:4px; display:block;">
+                A teljes összeg, amennyiért a vevő megvette az összes fenti tételt együtt (pl. 1 400 Ft).
+              </span>
+            </div>
+
+            <!-- Élő előnézet -->
+            <div style="background:var(--bg-dark); border:1px solid rgba(255,110,0,0.2); border-radius:var(--radius-sm); padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted); margin-bottom:6px;">
+                <span>Összes gyártási költség:</span>
+                <strong id="sale-preview-cost" style="color:var(--text-main);">0 Ft</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:900; margin-bottom:6px;">
+                <span style="color:var(--silver-primary);">Tiszta Haszon (Profit):</span>
+                <strong id="sale-preview-profit" style="color:var(--green);">+0 Ft</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+                <span>Elért haszonkulcs:</span>
+                <strong id="sale-preview-margin" style="color:var(--blue);">0%</strong>
+              </div>
+            </div>
+
+            <!-- Mentés Gomb -->
+            <div>
+              <button type="submit" class="btn btn-primary" id="btn-submit-sale" style="width:100%; font-size:15px; padding:13px; justify-content:center;">
+                💾 Eladás Rögzítése & Mentése
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Eladási Előzmények Táblázat Kártya -->
+      <div class="card">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div class="card-title">
+            <span>📋</span>
+            <span>Részletes Eladási Nyilvántartás & Profit Táblázat</span>
+          </div>
+
+          <!-- Kereső és szűrők -->
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="sales-search-input" placeholder="🔍 Keresés termékre, vevőre..." 
+                   oninput="filterSalesTable()" 
+                   style="font-size:12px; padding:6px 12px; width:200px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main);">
+            
+            <select id="sales-period-select" onchange="filterSalesTable()"
+                    style="font-size:12px; padding:6px 10px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main);">
+              <option value="all">📅 Minden időszak</option>
+              <option value="this_month">📅 Ez a hónap</option>
+              <option value="prev_month">📅 Előző hónap</option>
+              <option value="this_year">📅 Ez az év</option>
+            </select>
+
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportSalesToCsv()" title="Táblázat letöltése CSV / Excel formátumban">
+              📥 Export (CSV)
+            </button>
+          </div>
+        </div>
+
+        <!-- Táblázat konténer -->
+        <div style="overflow-x:auto;">
+          <table class="vexora-table" id="sales-main-table">
+            <thead>
+              <tr>
+                <th style="width:100px;">Dátum</th>
+                <th>Eladott Termékek (Csomag tételei)</th>
+                <th>Vevő & Csatorna</th>
+                <th style="text-align:right;">Gyártási Költség</th>
+                <th style="text-align:right;">Eladási Ár</th>
+                <th style="text-align:right;">Tiszta Profit</th>
+                <th style="text-align:right;">Haszonkulcs</th>
+                <th style="text-align:center; width:70px;">Művelet</th>
+              </tr>
+            </thead>
+            <tbody id="sales-table-body">
+              <!-- JS tölti fel az eladásokat -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 5: BEÁLLÍTÁSOK -->
+    <section id="tab-settings" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚙️</span>
+            <span>Bambu Lab A1 & Áramdíj Beállítások</span>
+          </div>
+        </div>
+
+        <form onsubmit="saveSettingsSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Bambu Lab A1 Fogyasztása (Watt)</label>
+              <input type="number" id="set-power" name="power" min="50" max="1000" value="120">
+              <small style="color:var(--text-dim); font-size:11px;">Bambu A1 nyomtatás közben átlagosan 100-130 W</small>
+            </div>
+            <div class="form-group">
+              <label>Áramdíj (Ft / kWh)</label>
+              <input type="number" id="set-elec" name="elec" min="10" step="0.5" value="70">
+              <small style="color:var(--text-dim); font-size:11px;">Aktuális lakossági vagy céges áramtarifa</small>
+            </div>
+            <div class="form-group">
+              <label>Alapértelmezett Haszonkulcs (%)</label>
+              <input type="number" id="set-profit" name="profit" min="0" value="100">
+              <small style="color:var(--text-dim); font-size:11px;">+100% = az önköltség 2-szerese az ár</small>
+            </div>
+            <div class="form-group">
+              <label>ÁFA / Adókulcs (%)</label>
+              <input type="number" id="set-tax" name="tax" min="0" value="0">
+              <small style="color:var(--text-dim); font-size:11px;">0% Alanyi Adómentes (AAM) vagy 27%</small>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+            <button type="submit" class="btn btn-primary">
+              💾 Beállítások Mentése
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 5: ÁRAJÁNLAT -->
+    <section id="tab-quote" class="tab-pane">
+      <div class="card quote-actions no-print" style="margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+          <div style="display:flex; gap:16px; align-items:center;">
+            <div>
+              <label>Szállítási Költség (Ft)</label>
+              <input type="number" id="quote-ship-cost" value="0" placeholder="pl. 1990" style="width:140px;" oninput="renderQuoteView()">
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="window.print()">
+              🖨️ Nyomtatás / PDF Mentése
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nyomtatható lap -->
+      <div id="quote-document-container">
+        <!-- JS generálja -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar (iPhone / Android) -->
+  <nav class="mobile-bottom-nav">
+    <button type="button" class="mobile-nav-btn active" data-tab="tab-calc">
+      <span class="m-icon">🎯</span>
+      <span class="m-label">Árazás</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-tab="tab-sales">
+      <span class="m-icon">💰</span>
+      <span class="m-label">Eladások</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-tab="tab-filaments">
+      <span class="m-icon">🧵</span>
+      <span class="m-label">Filament</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-tab="tab-history">
+      <span class="m-icon">📂</span>
+      <span class="m-label">Projektek</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-tab="tab-settings">
+      <span class="m-icon">⚙️</span>
+      <span class="m-label">Beállítás</span>
+    </button>
+  </nav>
+
+  <!-- Modal: Mobil Csatlakozás & PWA útmutató -->
+  <div id="modal-mobile-connect" class="vexora-modal" style="display:none;">
+    <div class="vexora-modal-content">
+      <div class="vexora-modal-header">
+        <h3>📱 3DVEXORA Mobil & iPhone PWA Csatlakozás</h3>
+        <button class="vexora-modal-close" onclick="closeModals()">✕</button>
+      </div>
+      <div class="vexora-modal-body">
+        <div style="text-align:center; margin-bottom:18px;">
+          <img id="qr-code-img" src="" alt="QR Kód" style="width:190px; height:190px; border-radius:12px; border:2px solid var(--orange-primary); background:#fff; padding:6px; box-shadow:0 0 20px rgba(255,110,0,0.3);">
+          <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
+            Olvasd be a telefonod kamerájával az azonnali megnyitáshoz!
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px; background:var(--bg-card-secondary);">
+          <div style="font-weight:700; color:var(--orange-primary); margin-bottom:6px; font-size:13px;">
+            🌐 Közvetlen Wi-Fi Hálózati Cím (ha a gép be van kapcsolva):
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="local-wifi-url" readonly style="flex:1; font-size:13px; font-weight:700; background:var(--bg-input); color:var(--text-main); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:8px 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="copyToClipboard(document.getElementById('local-wifi-url').value)">Másolás</button>
+          </div>
+        </div>
+
+        <div class="card" style="background:var(--bg-card-secondary);">
+          <div style="font-weight:700; color:var(--green); margin-bottom:6px; font-size:13px;">
+            📲 Hogyan tedd ki iPhone Főképernyőre (PWA ikonnal)?
+          </div>
+          <ol style="font-size:12px; color:var(--silver-muted); padding-left:18px; line-height:1.7;">
+            <li>Nyisd meg a fenti címet vagy a GitHub Pages linket az iPhone <strong>Safari</strong> böngészőjében!</li>
+            <li>Koppints a böngésző alján lévő <strong>Megosztás</strong> gombra (négyzet felfelé nyíllal ⎋).</li>
+            <li>Görgess le, és válaszd a <strong>„Főképernyőhöz adás”</strong> (Add to Home Screen) opciót!</li>
+            <li>Kész is! Megjelenik a telefonodon az elegáns <strong>3DVEXORA</strong> ikon, és teljes képernyős natív alkalmazásként indul!</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Felhőszinkronizáció -->
+  <div id="modal-cloud-sync" class="vexora-modal" style="display:none;">
+    <div class="vexora-modal-content">
+      <div class="vexora-modal-header">
+        <h3>☁️ 3DVEXORA Kétirányú Felhőszinkronizáció</h3>
+        <button class="vexora-modal-close" onclick="closeModals()">✕</button>
+      </div>
+      <div class="vexora-modal-body">
+        <p style="font-size:13px; color:var(--silver-muted); margin-bottom:14px;">
+          A felhőszinkronizáció biztosítja, hogy a gépen lévő árak, filamentek és projektek azonnal megjelenjenek a telefonodon, és a telefonon rögzített eladások bekerüljenek a gép adatbázisába!
+        </p>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card-secondary); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Szinkronizáció Állapota:</div>
+            <strong id="sync-modal-status-text" style="color:var(--green); font-size:14px;">✅ Helyi adatbázis készen áll</strong>
+            <div id="sync-last-time" style="font-size:11px; color:var(--text-dim);">Utolsó szinkron: még nem történt</div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-trigger-sync" onclick="triggerManualSync()">
+            🔄 Szinkronizálás Most
+          </button>
+        </div>
+
+        <div class="card" style="background:var(--bg-card-secondary);">
+          <div style="font-weight:700; color:var(--orange-primary); margin-bottom:6px; font-size:13px;">
+            🐙 GitHub Pages & Felhő Kapcsolat:
+          </div>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">
+            A GitHub fiókod: <strong>EnBest2</strong>. Add meg a GitHub Personal Access Token-edet az automatikus 1-kattintásos feltöltéshez és GitHub Pages aktiváláshoz:
+          </p>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx (GitHub Token)" style="font-size:12px; padding:8px 10px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main);">
+            <button type="button" class="btn btn-secondary" onclick="deployToGitHubFromUI()" id="btn-deploy-gh" style="justify-content:center;">
+              🚀 1-Kattintásos Feltöltés GitHub Pages-re (enbest2.github.io/3dvexora)
+            </button>
+          </div>
+          <div id="deploy-gh-result" style="margin-top:10px; font-size:12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
