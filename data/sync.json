@@ -1,0 +1,214 @@
+{
+  "studio": "3DVEXORA",
+  "exported_at": "2026-11-15T12:37:54.444954",
+  "device": "PC",
+  "settings": {
+    "studio_name": "3DVEXORA",
+    "studio_subtitle": "3D PRINTING STUDIO",
+    "studio_email": "info@3dvexora.hu",
+    "studio_phone": "+36 ",
+    "currency": "Ft",
+    "printer_name": "Bambu Lab A1 + AMS Lite",
+    "printer_avg_power_watts": 120,
+    "electricity_kwh_cost": 70.0,
+    "default_profit_margin_percent": 100.0,
+    "tax_rate_percent": 0.0
+  },
+  "filaments": [
+    {
+      "id": 2,
+      "brand": "Alzament",
+      "material": "PLA",
+      "color_name": "Fehér Matt",
+      "color_hex": "#ffffff",
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4880.0,
+      "remaining_g": 1000.0,
+      "notes": "",
+      "created_at": "2026-11-12 09:05:25",
+      "cost_per_gram": 4.88
+    },
+    {
+      "id": 1,
+      "brand": "Alzament",
+      "material": "PLA",
+      "color_name": "Red Matt",
+      "color_hex": "#ff0000",
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4880.0,
+      "remaining_g": 1000.0,
+      "notes": "",
+      "created_at": "2026-11-12 09:04:53",
+      "cost_per_gram": 4.88
+    },
+    {
+      "id": 3,
+      "brand": "Elegoo",
+      "material": "PLA",
+      "color_name": "Fekete Matt",
+      "color_hex": "#000000",
+      "spool_weight_g": 1000.0,
+      "spool_price_huf": 4150.0,
+      "remaining_g": 1000.0,
+      "notes": "",
+      "created_at": "2026-11-12 09:05:57",
+      "cost_per_gram": 4.15
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "project_name": "Cica",
+      "client_name": "Péter",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-12 09:22:02",
+      "updated_at": "2026-11-12 09:22:02",
+      "items": [
+        {
+          "id": 1,
+          "project_id": 1,
+          "name": "Cica",
+          "items_on_plate": 6,
+          "quantity": 1,
+          "print_hours": 18.0,
+          "print_minutes": 50.0,
+          "profit_margin_percent": 240.0,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 2,
+              "grams": 150.5
+            },
+            {
+              "slot": 2,
+              "filament_id": 1,
+              "grams": 26.9
+            },
+            {
+              "slot": 3,
+              "filament_id": 2,
+              "grams": 22.1
+            },
+            {
+              "slot": 4,
+              "filament_id": 2,
+              "grams": 6.6
+            },
+            {
+              "slot": 5,
+              "filament_id": 2,
+              "grams": 2.1
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 6,
+            "quantity": 1,
+            "unit_grams": 34.7,
+            "unit_time_formatted": "3ó 8p",
+            "unit_material_cost": 169,
+            "unit_electricity_cost": 26,
+            "unit_net_cost": 196,
+            "unit_profit": 470,
+            "unit_sale_price": 665,
+            "total_grams": 34.7,
+            "total_print_hours": 3.14,
+            "print_time_formatted": "3ó 8p",
+            "plate_time_formatted": "18ó 50p",
+            "total_kwh_used": 0.377,
+            "total_material_cost": 169,
+            "total_electricity_cost": 26,
+            "total_net_cost": 196,
+            "total_profit": 470,
+            "total_price": 665,
+            "cost_percentages": {
+              "material": 86.5,
+              "electricity": 13.5
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 2,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 150.5,
+                "unit_grams": 25.08,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 734.4
+              },
+              {
+                "slot": 2,
+                "filament_id": 1,
+                "name": "Alzament PLA (Red Matt)",
+                "color_hex": "#ff0000",
+                "plate_grams": 26.9,
+                "unit_grams": 4.48,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 131.3
+              },
+              {
+                "slot": 3,
+                "filament_id": 2,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 22.1,
+                "unit_grams": 3.68,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 107.8
+              },
+              {
+                "slot": 4,
+                "filament_id": 2,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 6.6,
+                "unit_grams": 1.1,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 32.2
+              },
+              {
+                "slot": 5,
+                "filament_id": 2,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 2.1,
+                "unit_grams": 0.35,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 10.2
+              }
+            ]
+          },
+          "total_price_huf": 665.0
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 665.0
+    }
+  ],
+  "sales": [],
+  "summary": {
+    "total_sales_count": 0,
+    "total_revenue": 0.0,
+    "total_cost": 0.0,
+    "total_profit": 0.0,
+    "total_items_sold": 0,
+    "avg_profit_margin_percent": 0.0,
+    "avg_order_value": 0.0
+  }
+}
