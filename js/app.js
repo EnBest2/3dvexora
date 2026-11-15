@@ -52,12 +52,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupNavigation();
   setupDropzone();
-  await loadSettings();
-  await loadFilaments();
-  await loadProjects();
-  await loadSales();
-  initSaleForm();
 
+  const isCloud = window.location.hostname.includes("github.io");
+  if (isCloud) {
+    await loadAllFromCloudSyncFile();
+    populateSettingsForm();
+    renderFilamentTable();
+    renderProjectsList();
+    renderSalesKpis();
+    renderSalesTable();
+    updateSaleProductsDropdowns();
+  } else {
+    await loadSettings();
+    await loadFilaments();
+    await loadProjects();
+    await loadSales();
+  }
+
+  initSaleForm();
   renderAmsSlots();
   bindFormInputs();
   recalculateCurrentItem();
@@ -144,24 +156,55 @@ async function apiPost(endpoint, data) {
 }
 
 // --- Load Data with Cloud / Static Fallback ---
-async function tryLoadFromCloudData() {
+async function loadAllFromCloudSyncFile() {
   try {
-    const res = await fetch("data/sync.json");
+    const res = await fetch(`./data/sync.json?t=${Date.now()}`);
     if (res.ok) {
       const data = await res.json();
       if (data) {
-        if (!AppState.filaments || AppState.filaments.length === 0) AppState.filaments = data.filaments || [];
-        if (!AppState.projects || AppState.projects.length === 0) AppState.projects = data.projects || [];
-        if (!AppState.settings || Object.keys(AppState.settings).length === 0) AppState.settings = data.settings || {};
-        if (!AppState.sales || AppState.sales.length === 0) AppState.sales = data.sales || [];
-        if (!AppState.salesSummary || Object.keys(AppState.salesSummary).length === 0) AppState.salesSummary = data.summary || {};
+        if (data.filaments) AppState.filaments = data.filaments;
+        if (data.projects) AppState.projects = data.projects;
+        if (data.settings) AppState.settings = data.settings;
+        if (data.sales) AppState.sales = data.sales;
+        if (data.summary) AppState.salesSummary = data.summary;
+
+        // Offline eladások összefésülése a localStorage-ból
+        try {
+          const offlineSales = JSON.parse(localStorage.getItem("3dvexora_offline_sales") || "[]");
+          if (Array.isArray(offlineSales) && offlineSales.length > 0) {
+            const existingIds = new Set((AppState.sales || []).map(s => s.id));
+            offlineSales.forEach(os => {
+              if (!existingIds.has(os.id)) {
+                AppState.sales.unshift(os);
+              }
+            });
+          }
+        } catch (e) {}
+
+        // Eladási termékek lista előkészítése a projektekből
+        if (AppState.projects && AppState.projects.length > 0) {
+          AppState.saleProducts = AppState.projects.map(p => {
+            const item = (p.items && p.items.length > 0) ? p.items[0] : null;
+            const calc = item ? item.calculation_summary : null;
+            return {
+              project_id: p.id,
+              name: p.project_name,
+              unit_cost: calc ? (calc.unit_net_cost || 0) : 0,
+              unit_price: calc ? (calc.unit_sale_price || 0) : (p.total_price_huf || 0)
+            };
+          });
+        }
         return true;
       }
     }
-  } catch (e) {
-    // Statikus / offline módban normális
+  } catch (err) {
+    console.error("Hiba a cloud sync betöltésekor:", err);
   }
   return false;
+}
+
+async function tryLoadFromCloudData() {
+  return await loadAllFromCloudSyncFile();
 }
 
 async function loadSettings() {
@@ -754,10 +797,10 @@ function renderProjectsList() {
           </div>
           <div style="text-align:right;">
             <div style="font-size:22px; font-weight:900; color:var(--orange-primary);">
-              ${p.total_price_huf.toLocaleString('hu-HU')} Ft
+              ${(p.total_price_huf || 0).toLocaleString('hu-HU')} Ft
             </div>
             <div style="font-size:12px; color:var(--silver-muted); margin-bottom:8px;">
-              ${unitPrice.toLocaleString('hu-HU')} Ft / db
+              ${(unitPrice || 0).toLocaleString('hu-HU')} Ft / db
             </div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-primary btn-sm" onclick="loadProjectIntoCalc(${p.id})">
