@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-16T21:00:02.736383",
+  "exported_at": "2026-11-16T21:08:32.550450",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-16T20:59:27.037400"
+    "last_cloud_sync": "2026-11-16T21:00:03.889266"
   },
   "filaments": [
     {
@@ -86,6 +86,140 @@
     }
   ],
   "projects": [
+    {
+      "id": 10,
+      "project_name": "Kutya.gcode",
+      "client_name": "",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-16 20:08:29",
+      "updated_at": "2026-11-16 20:08:29",
+      "items": [
+        {
+          "id": 11,
+          "project_id": 10,
+          "name": "Kutya.gcode",
+          "quantity": 1,
+          "print_hours": 11.0,
+          "print_minutes": 20.0,
+          "profit_margin_percent": 380.0,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 10,
+              "grams": 84.5
+            },
+            {
+              "slot": 2,
+              "filament_id": 13,
+              "grams": 5
+            },
+            {
+              "slot": 3,
+              "filament_id": 10,
+              "grams": 29
+            },
+            {
+              "slot": 4,
+              "filament_id": 11,
+              "grams": 17.8
+            },
+            {
+              "slot": 5,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 4,
+            "quantity": 1,
+            "unit_grams": 34.08,
+            "unit_time_formatted": "2ó 50p",
+            "unit_material_cost": 166,
+            "unit_electricity_cost": 24,
+            "unit_net_cost": 190,
+            "unit_profit": 723,
+            "unit_sale_price": 913,
+            "total_grams": 34.1,
+            "total_print_hours": 2.83,
+            "print_time_formatted": "2ó 50p",
+            "plate_time_formatted": "11ó 20p",
+            "total_kwh_used": 0.34,
+            "total_material_cost": 166,
+            "total_electricity_cost": 24,
+            "total_net_cost": 190,
+            "total_profit": 723,
+            "total_price": 913,
+            "cost_percentages": {
+              "material": 87.5,
+              "electricity": 12.5
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 84.5,
+                "unit_grams": 21.12,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 412.4
+              },
+              {
+                "slot": 2,
+                "filament_id": 13,
+                "name": "Flashforge PLA (Fekete Matt)",
+                "color_hex": "#000000",
+                "plate_grams": 5,
+                "unit_grams": 1.25,
+                "cost_per_g": 4.99,
+                "slot_cost_plate": 25
+              },
+              {
+                "slot": 3,
+                "filament_id": 10,
+                "name": "Alzament PLA (Fehér Matt)",
+                "color_hex": "#ffffff",
+                "plate_grams": 29,
+                "unit_grams": 7.25,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 141.5
+              },
+              {
+                "slot": 4,
+                "filament_id": 11,
+                "name": "Alzament PLA (Red Matt)",
+                "color_hex": "#ff0000",
+                "plate_grams": 17.8,
+                "unit_grams": 4.45,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 86.9
+              }
+            ]
+          },
+          "total_price_huf": 913.0,
+          "items_on_plate": 4
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 913.0
+    },
     {
       "id": 9,
       "project_name": "Szarvas.gcode",
