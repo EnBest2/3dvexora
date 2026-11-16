@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-16T21:08:54.560072",
+  "exported_at": "2026-11-16T21:09:39.515932",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-16T21:08:33.571189"
+    "last_cloud_sync": "2026-11-16T21:08:55.630943"
   },
   "filaments": [
     {
@@ -86,6 +86,110 @@
     }
   ],
   "projects": [
+    {
+      "id": 9,
+      "project_name": "Szarvas.gcode",
+      "client_name": "",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-15 21:22:26",
+      "updated_at": "2026-11-16 20:09:35",
+      "items": [
+        {
+          "id": 13,
+          "project_id": 9,
+          "name": "Szarvas.gcode",
+          "quantity": 1,
+          "print_hours": 4.0,
+          "print_minutes": 39.0,
+          "profit_margin_percent": 249.1,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 16,
+              "grams": 44.8
+            },
+            {
+              "slot": 2,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 3,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 4,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 5,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 1,
+            "quantity": 1,
+            "unit_grams": 44.8,
+            "unit_time_formatted": "4ó 39p",
+            "unit_material_cost": 219,
+            "unit_electricity_cost": 39,
+            "unit_net_cost": 258,
+            "unit_profit": 642,
+            "unit_sale_price": 900,
+            "total_grams": 44.8,
+            "total_print_hours": 4.65,
+            "print_time_formatted": "4ó 39p",
+            "plate_time_formatted": "4ó 39p",
+            "total_kwh_used": 0.558,
+            "total_material_cost": 219,
+            "total_electricity_cost": 39,
+            "total_net_cost": 258,
+            "total_profit": 642,
+            "total_price": 900,
+            "cost_percentages": {
+              "material": 84.8,
+              "electricity": 15.2
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 16,
+                "name": "Sunlu PLA (Csokoládé Barna)",
+                "color_hex": "#82400d",
+                "plate_grams": 44.8,
+                "unit_grams": 44.8,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 218.6
+              }
+            ]
+          },
+          "total_price_huf": 900.0,
+          "items_on_plate": 1
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 900.0
+    },
     {
       "id": 10,
       "project_name": "Kutya.gcode",
@@ -219,110 +323,6 @@
       ],
       "items_count": 1,
       "total_price_huf": 900.0
-    },
-    {
-      "id": 9,
-      "project_name": "Szarvas.gcode",
-      "client_name": "",
-      "client_contact": "",
-      "notes": "",
-      "status": "Mentve",
-      "created_at": "2026-11-15 21:22:26",
-      "updated_at": "2026-11-15 21:22:26",
-      "items": [
-        {
-          "id": 10,
-          "project_id": 9,
-          "name": "Szarvas.gcode",
-          "quantity": 1,
-          "print_hours": 4.0,
-          "print_minutes": 39.0,
-          "profit_margin_percent": 100.0,
-          "filament_assignments": [
-            {
-              "slot": 1,
-              "filament_id": 16,
-              "grams": 44.8
-            },
-            {
-              "slot": 2,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 3,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 4,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 5,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 6,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 7,
-              "filament_id": null,
-              "grams": 0
-            },
-            {
-              "slot": 8,
-              "filament_id": null,
-              "grams": 0
-            }
-          ],
-          "calculation_summary": {
-            "items_on_plate": 1,
-            "quantity": 1,
-            "unit_grams": 44.8,
-            "unit_time_formatted": "4ó 39p",
-            "unit_material_cost": 219,
-            "unit_electricity_cost": 39,
-            "unit_net_cost": 258,
-            "unit_profit": 258,
-            "unit_sale_price": 515,
-            "total_grams": 44.8,
-            "total_print_hours": 4.65,
-            "print_time_formatted": "4ó 39p",
-            "plate_time_formatted": "4ó 39p",
-            "total_kwh_used": 0.558,
-            "total_material_cost": 219,
-            "total_electricity_cost": 39,
-            "total_net_cost": 258,
-            "total_profit": 258,
-            "total_price": 515,
-            "cost_percentages": {
-              "material": 84.8,
-              "electricity": 15.2
-            },
-            "filaments": [
-              {
-                "slot": 1,
-                "filament_id": 16,
-                "name": "Sunlu PLA (Csokoládé Barna)",
-                "color_hex": "#82400d",
-                "plate_grams": 44.8,
-                "unit_grams": 44.8,
-                "cost_per_g": 4.88,
-                "slot_cost_plate": 218.6
-              }
-            ]
-          },
-          "total_price_huf": 515.0,
-          "items_on_plate": 1
-        }
-      ],
-      "items_count": 1,
-      "total_price_huf": 515.0
     },
     {
       "id": 8,
