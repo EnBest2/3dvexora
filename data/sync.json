@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-16T20:59:25.829493",
+  "exported_at": "2026-11-16T21:00:02.736383",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-15T22:22:31.412935"
+    "last_cloud_sync": "2026-11-16T20:59:27.037400"
   },
   "filaments": [
     {
@@ -719,6 +719,34 @@
   ],
   "sales": [
     {
+      "id": 9,
+      "sale_date": "2026-11-16",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 258.0,
+      "profit_huf": 642.0,
+      "profit_margin_percent": 248.84,
+      "notes": "",
+      "created_at": "2026-11-16 19:59:59",
+      "updated_at": "2026-11-16 19:59:59",
+      "items": [
+        {
+          "id": 10,
+          "sale_id": 9,
+          "project_id": 9,
+          "item_name": "Szarvas.gcode",
+          "quantity": 1,
+          "unit_cost_huf": 258.0,
+          "total_cost_huf": 258.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 1,
+      "items_summary": "1x Szarvas.gcode",
+      "is_bundle": false
+    },
+    {
       "id": 8,
       "sale_date": "2026-11-15",
       "buyer_name": "",
@@ -898,12 +926,12 @@
     }
   ],
   "summary": {
-    "total_sales_count": 6,
-    "total_revenue": 6900.0,
-    "total_cost": 2469.0,
-    "total_profit": 4431.0,
-    "total_items_sold": 9,
-    "avg_profit_margin_percent": 179.5,
-    "avg_order_value": 1150.0
+    "total_sales_count": 7,
+    "total_revenue": 7800.0,
+    "total_cost": 2727.0,
+    "total_profit": 5073.0,
+    "total_items_sold": 10,
+    "avg_profit_margin_percent": 186.0,
+    "avg_order_value": 1114.0
   }
 }
