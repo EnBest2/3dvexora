@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-16T21:08:32.550450",
+  "exported_at": "2026-11-16T21:08:54.560072",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-16T21:00:03.889266"
+    "last_cloud_sync": "2026-11-16T21:08:33.571189"
   },
   "filaments": [
     {
@@ -94,16 +94,16 @@
       "notes": "",
       "status": "Mentve",
       "created_at": "2026-11-16 20:08:29",
-      "updated_at": "2026-11-16 20:08:29",
+      "updated_at": "2026-11-16 20:08:50",
       "items": [
         {
-          "id": 11,
+          "id": 12,
           "project_id": 10,
           "name": "Kutya.gcode",
           "quantity": 1,
           "print_hours": 11.0,
           "print_minutes": 20.0,
-          "profit_margin_percent": 380.0,
+          "profit_margin_percent": 373.0,
           "filament_assignments": [
             {
               "slot": 1,
@@ -154,8 +154,8 @@
             "unit_material_cost": 166,
             "unit_electricity_cost": 24,
             "unit_net_cost": 190,
-            "unit_profit": 723,
-            "unit_sale_price": 913,
+            "unit_profit": 709,
+            "unit_sale_price": 900,
             "total_grams": 34.1,
             "total_print_hours": 2.83,
             "print_time_formatted": "2ó 50p",
@@ -164,8 +164,8 @@
             "total_material_cost": 166,
             "total_electricity_cost": 24,
             "total_net_cost": 190,
-            "total_profit": 723,
-            "total_price": 913,
+            "total_profit": 709,
+            "total_price": 900,
             "cost_percentages": {
               "material": 87.5,
               "electricity": 12.5
@@ -213,12 +213,12 @@
               }
             ]
           },
-          "total_price_huf": 913.0,
+          "total_price_huf": 900.0,
           "items_on_plate": 4
         }
       ],
       "items_count": 1,
-      "total_price_huf": 913.0
+      "total_price_huf": 900.0
     },
     {
       "id": 9,
