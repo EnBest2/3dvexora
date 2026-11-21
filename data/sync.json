@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-21T22:29:36.678066",
+  "exported_at": "2026-11-21T22:30:16.227016",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -16,7 +16,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-21T19:29:17.136820"
+    "last_cloud_sync": "2026-11-21T22:29:37.991633"
   },
   "filaments": [
     {
@@ -853,6 +853,34 @@
   ],
   "sales": [
     {
+      "id": 15,
+      "sale_date": "2026-11-21",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 900.0,
+      "total_cost_huf": 297.0,
+      "profit_huf": 603.0,
+      "profit_margin_percent": 203.03,
+      "notes": "",
+      "created_at": "2026-11-21 21:30:12",
+      "updated_at": "2026-11-21 21:30:12",
+      "items": [
+        {
+          "id": 16,
+          "sale_id": 15,
+          "project_id": 7,
+          "item_name": "cica3db",
+          "quantity": 1,
+          "unit_cost_huf": 297.0,
+          "total_cost_huf": 297.0,
+          "unit_sale_price_huf": 0.0
+        }
+      ],
+      "items_count": 1,
+      "items_summary": "1x cica3db",
+      "is_bundle": false
+    },
+    {
       "id": 14,
       "sale_date": "2026-11-21",
       "buyer_name": "",
@@ -1172,12 +1200,12 @@
     }
   ],
   "summary": {
-    "total_sales_count": 11,
-    "total_revenue": 11400.0,
-    "total_cost": 3759.0,
-    "total_profit": 7641.0,
-    "total_items_sold": 14,
+    "total_sales_count": 12,
+    "total_revenue": 12300.0,
+    "total_cost": 4056.0,
+    "total_profit": 8244.0,
+    "total_items_sold": 15,
     "avg_profit_margin_percent": 203.3,
-    "avg_order_value": 1036.0
+    "avg_order_value": 1025.0
   }
 }
