@@ -10,6 +10,9 @@ const AppState = {
   sales: [],
   salesSummary: {},
   saleProducts: [],
+  saleDiscountMode: "auto",
+  saleDiscountPercent: 0,
+  saleManualPriceOverride: false,
   currentProject: {
     id: null,
     loaded_name: null,
@@ -27,6 +30,8 @@ const AppState = {
     print_hours: 2,
     print_minutes: 30,
     profit_margin_percent: 100,
+    discount_percent: 0,
+    vinted_auto_discount: false,
     // 8 AMS Slot
     filament_assignments: [
       { slot: 1, filament_id: null, grams: 0 },
@@ -40,6 +45,50 @@ const AppState = {
     ]
   }
 };
+
+function getVintedDiscountTiers(settings = AppState.settings) {
+  const s = settings || {};
+  const toPct = (v, def) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? Math.max(0, Math.min(90, n)) : def;
+  };
+  return {
+    two: toPct(s.vinted_discount_2_items, 10),
+    three: toPct(s.vinted_discount_3_items, 15),
+    five: toPct(s.vinted_discount_5_items, 20)
+  };
+}
+
+function getVintedDiscountForQuantity(qty, settings = AppState.settings) {
+  const tiers = getVintedDiscountTiers(settings);
+  if (qty >= 5) return tiers.five;
+  if (qty >= 3) return tiers.three;
+  if (qty >= 2) return tiers.two;
+  return 0;
+}
+
+function buildVintedTiersPreviewClient(listUnitPrice, unitNetCost, settings = AppState.settings) {
+  const tiers = getVintedDiscountTiers(settings);
+  return [
+    { sample_qty: 2, label: "2 db", discount_percent: tiers.two },
+    { sample_qty: 3, label: "3–4 db", discount_percent: tiers.three },
+    { sample_qty: 5, label: "5+ db", discount_percent: tiers.five }
+  ].map(t => {
+    const factor = 1 - (t.discount_percent / 100);
+    const unitPrice = Math.round(listUnitPrice * factor);
+    const totalPrice = Math.round((listUnitPrice * t.sample_qty) * factor);
+    const totalCost = Math.round(unitNetCost * t.sample_qty);
+    return {
+      sample_qty: t.sample_qty,
+      label: t.label,
+      discount_percent: t.discount_percent,
+      unit_price: unitPrice,
+      total_price: totalPrice,
+      unit_profit: Math.round(unitPrice - unitNetCost),
+      total_profit: totalPrice - totalCost
+    };
+  });
+}
 
 const CLOUD_STORAGE_KEYS = {
   token: "3dvexora_gh_token",
@@ -99,7 +148,7 @@ function buildSaleProductsFromProjects(projects) {
       ? Math.round(Number(calc.unit_net_cost) || 0)
       : (p.summary?.total_net_cost ? Math.round(p.summary.total_net_cost / qty) : 0);
     const unitPrice = calc
-      ? Math.round(Number(calc.unit_sale_price) || 0)
+      ? Math.round(Number(calc.list_unit_sale_price || calc.unit_sale_price) || 0)
       : Math.round((Number(p.total_price_huf) || 0) / qty);
     return {
       project_id: p.id,
@@ -757,6 +806,8 @@ function startNewCalculation() {
     print_hours: 2,
     print_minutes: 30,
     profit_margin_percent: 100,
+    discount_percent: 0,
+    vinted_auto_discount: false,
     filament_assignments: [
       { slot: 1, filament_id: null, grams: 0 },
       { slot: 2, filament_id: null, grams: 0 },
@@ -832,14 +883,31 @@ function calculateItemCostClient(itemData, settings = {}) {
 
   const unitMaterialCost = plateMaterialCost / itemsOnPlate;
   const unitElectricityCost = plateElecCost / itemsOnPlate;
-  const unitNetCost = Math.round(unitMaterialCost + unitElectricityCost);
+  const unitNetCost = Math.round((unitMaterialCost + unitElectricityCost) * 10) / 10;
 
-  const unitProfit = Math.round(unitNetCost * (profitMargin / 100.0));
-  const unitSalePrice = unitNetCost + unitProfit;
+  const rawTax = parseFloat(settings.tax_rate_percent);
+  const taxRate = Number.isFinite(rawTax) ? Math.max(0, rawTax) : 0;
 
+  const unitProfitBase = Math.round(unitNetCost * (profitMargin / 100.0) * 10) / 10;
+  const unitSaleNet = unitNetCost + unitProfitBase;
+  const unitTax = Math.round(unitSaleNet * (taxRate / 100.0) * 10) / 10;
+  const listUnitPrice = Math.round(unitSaleNet + unitTax);
+  const listTotalPrice = Math.round(listUnitPrice * quantity);
+
+  const vintedAuto = !!itemData.vinted_auto_discount;
+  const rawDisc = parseFloat(itemData.discount_percent);
+  const discountPercent = vintedAuto
+    ? getVintedDiscountForQuantity(quantity, settings)
+    : (Number.isFinite(rawDisc) ? Math.max(0, Math.min(90, rawDisc)) : 0);
+
+  const discFactor = 1 - (discountPercent / 100.0);
   const totalNetCost = Math.round(unitNetCost * quantity);
-  const totalProfit = Math.round(unitProfit * quantity);
-  const totalPrice = Math.round(unitSalePrice * quantity);
+  const totalPrice = Math.round(listTotalPrice * discFactor);
+  const unitSalePrice = Math.round(listUnitPrice * discFactor);
+  const discountAmountHuf = listTotalPrice - totalPrice;
+
+  const totalProfit = Math.round(totalPrice - totalNetCost);
+  const unitProfit = Math.round(unitSalePrice - unitNetCost);
 
   const totalMaterialCost = Math.round(unitMaterialCost * quantity);
   const totalElectricityCost = Math.round(unitElectricityCost * quantity);
@@ -862,13 +930,16 @@ function calculateItemCostClient(itemData, settings = {}) {
   return {
     items_on_plate: itemsOnPlate,
     quantity: quantity,
+    discount_percent: Math.round(discountPercent * 10) / 10,
+    vinted_auto_discount: vintedAuto,
     unit_grams: unitGrams,
     unit_time_formatted: unitTimeFormatted,
     unit_material_cost: Math.round(unitMaterialCost),
     unit_electricity_cost: Math.round(unitElectricityCost),
-    unit_net_cost: unitNetCost,
+    unit_net_cost: Math.round(unitNetCost),
     unit_profit: unitProfit,
     unit_sale_price: unitSalePrice,
+    list_unit_sale_price: listUnitPrice,
     total_grams: totalGrams,
     total_print_hours: Math.round(totH * 100) / 100,
     print_time_formatted: totalTimeFormatted,
@@ -879,25 +950,128 @@ function calculateItemCostClient(itemData, settings = {}) {
     total_net_cost: totalNetCost,
     total_profit: totalProfit,
     total_price: totalPrice,
+    list_total_price: listTotalPrice,
+    discount_amount_huf: discountAmountHuf,
+    vinted_tiers: buildVintedTiersPreviewClient(listUnitPrice, Math.round(unitNetCost), settings),
     cost_percentages: { material: matPct, electricity: elecPct }
   };
 }
 
+function setCalcDiscountMode(mode, pct = 0) {
+  if (mode === "auto") {
+    AppState.currentItem.vinted_auto_discount = true;
+    AppState.currentItem.discount_percent = getVintedDiscountForQuantity(AppState.currentItem.quantity || 1, AppState.settings);
+  } else {
+    AppState.currentItem.vinted_auto_discount = false;
+    AppState.currentItem.discount_percent = Math.max(0, Math.min(90, parseFloat(pct) || 0));
+  }
+  const customInput = document.getElementById("calc-discount-custom");
+  if (customInput) customInput.value = Math.round(AppState.currentItem.discount_percent);
+  recalculateCurrentItem();
+}
+
+function onCalcCustomDiscountInput(rawVal) {
+  const val = Math.max(0, Math.min(90, parseFloat(rawVal) || 0));
+  AppState.currentItem.vinted_auto_discount = false;
+  AppState.currentItem.discount_percent = val;
+  recalculateCurrentItem();
+}
+
+function applyVintedTierInCalc(sampleQty) {
+  const qtyEl = document.getElementById("item-qty");
+  const qty = Math.max(1, parseInt(sampleQty) || 1);
+  if (qtyEl) qtyEl.value = qty;
+  AppState.currentItem.quantity = qty;
+  setCalcDiscountMode("auto");
+}
+
+function updateCalcDiscountControls(calc) {
+  const badge = document.getElementById("calc-discount-badge");
+  const discPct = Number(calc.discount_percent) || 0;
+  const isAuto = !!AppState.currentItem.vinted_auto_discount;
+
+  if (badge) {
+    if (discPct > 0) {
+      badge.innerText = isAuto ? `⚡ Auto (${calc.quantity} db): -${discPct}%` : `🏷️ -${discPct}% kedvezmény`;
+    } else {
+      badge.innerText = isAuto ? `⚡ Auto (1 db): 0%` : `0% (Alapár)`;
+    }
+  }
+
+  document.querySelectorAll("[data-calc-disc]").forEach(btn => {
+    const val = btn.getAttribute("data-calc-disc");
+    let active = false;
+    if (val === "auto") active = isAuto;
+    else active = !isAuto && Number(val) === discPct;
+    btn.classList.toggle("active", active);
+  });
+
+  const customEl = document.getElementById("calc-discount-custom");
+  if (customEl && document.activeElement !== customEl) {
+    customEl.value = discPct;
+  }
+
+  const tiersContainer = document.getElementById("calc-vinted-tiers");
+  if (tiersContainer) {
+    const tiers = Array.isArray(calc.vinted_tiers) && calc.vinted_tiers.length
+      ? calc.vinted_tiers
+      : buildVintedTiersPreviewClient(calc.list_unit_sale_price || calc.unit_sale_price || 0, calc.unit_net_cost || 0, AppState.settings);
+
+    tiersContainer.innerHTML = tiers.map(t => {
+      const profitColor = t.unit_profit > 0 ? "var(--green)" : "var(--red)";
+      const isMatching = discPct === t.discount_percent && (
+        (t.sample_qty === 2 && calc.quantity === 2) ||
+        (t.sample_qty === 3 && calc.quantity >= 3 && calc.quantity <= 4) ||
+        (t.sample_qty === 5 && calc.quantity >= 5)
+      );
+      return `
+        <div class="vinted-tier-row ${isMatching ? 'active-tier' : ''}" onclick="applyVintedTierInCalc(${t.sample_qty})" title="Kattints a ${t.sample_qty} db-os Vinted csomagár kipróbálásához">
+          <span><strong>${t.label}</strong> <span style="color:#38BDF8;">(-${t.discount_percent}%)</span></span>
+          <span>${t.unit_price.toLocaleString('hu-HU')} Ft/db</span>
+          <span style="color:${profitColor}; font-weight:700;">${t.unit_profit >= 0 ? '+' : ''}${t.unit_profit.toLocaleString('hu-HU')} Ft/db profit</span>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
 function updateSidebarDisplay(calc) {
   const grandPriceEl = document.getElementById("sidebar-grand-price");
+  const listPriceEl = document.getElementById("sidebar-list-price");
   const unitPriceEl = document.getElementById("sidebar-unit-price");
   const costPillEl = document.getElementById("sidebar-cost-pill");
   const profitPillEl = document.getElementById("sidebar-profit-pill");
 
+  const discPct = Number(calc.discount_percent) || 0;
+  const discAmt = Number(calc.discount_amount_huf) || 0;
+  if (listPriceEl) {
+    if (discPct > 0 && discAmt > 0 && calc.list_total_price) {
+      listPriceEl.style.display = "block";
+      listPriceEl.innerText = `Listaár: ${calc.list_total_price.toLocaleString('hu-HU')} Ft (-${discPct}%: -${discAmt.toLocaleString('hu-HU')} Ft)`;
+    } else {
+      listPriceEl.style.display = "none";
+    }
+  }
+
   if (grandPriceEl) grandPriceEl.innerText = `${calc.total_price.toLocaleString('hu-HU')} Ft`;
   if (unitPriceEl) unitPriceEl.innerText = `${calc.unit_sale_price.toLocaleString('hu-HU')} Ft / db (${calc.quantity} db összesen)`;
   if (costPillEl) costPillEl.innerText = `1 db önköltség: ${calc.unit_net_cost.toLocaleString('hu-HU')} Ft`;
-  if (profitPillEl) profitPillEl.innerText = `Haszon: +${calc.total_profit.toLocaleString('hu-HU')} Ft`;
+  if (profitPillEl) {
+    const isLoss = calc.total_profit <= 0 && calc.total_net_cost > 0;
+    profitPillEl.classList.toggle("loss", isLoss);
+    profitPillEl.innerText = isLoss
+      ? `⚠️ Veszteség: ${calc.total_profit.toLocaleString('hu-HU')} Ft`
+      : `Haszon: +${calc.total_profit.toLocaleString('hu-HU')} Ft`;
+  }
 
   document.getElementById("cost-material").innerText = `${calc.total_material_cost.toLocaleString('hu-HU')} Ft (1 db: ${calc.unit_material_cost.toLocaleString('hu-HU')} Ft)`;
   document.getElementById("cost-electricity").innerText = `${calc.total_electricity_cost.toLocaleString('hu-HU')} Ft (1 db: ${calc.unit_electricity_cost.toLocaleString('hu-HU')} Ft)`;
   document.getElementById("cost-total-net").innerText = `${calc.total_net_cost.toLocaleString('hu-HU')} Ft (1 db: ${calc.unit_net_cost.toLocaleString('hu-HU')} Ft)`;
-  document.getElementById("cost-profit").innerText = `+${calc.total_profit.toLocaleString('hu-HU')} Ft`;
+  const costProfitEl = document.getElementById("cost-profit");
+  if (costProfitEl) {
+    costProfitEl.innerText = `${calc.total_profit >= 0 ? '+' : ''}${calc.total_profit.toLocaleString('hu-HU')} Ft`;
+    costProfitEl.style.color = calc.total_profit >= 0 ? "var(--green)" : "var(--red)";
+  }
 
   document.getElementById("stat-total-grams").innerText = `${calc.total_grams} g (1 db: ${calc.unit_grams} g)`;
   document.getElementById("stat-print-time").innerText = `${calc.print_time_formatted} (Tálca idő: ${calc.plate_time_formatted})`;
@@ -906,6 +1080,8 @@ function updateSidebarDisplay(calc) {
   const p = calc.cost_percentages;
   document.getElementById("bar-material").style.width = `${p.material}%`;
   document.getElementById("bar-elec").style.width = `${p.electricity}%`;
+
+  updateCalcDiscountControls(calc);
 }
 
 // --- Bambu Studio File Dropzone ---
@@ -1048,6 +1224,8 @@ async function saveProjectToDb(saveAsNew = false) {
       print_hours: AppState.currentItem.print_hours || 0,
       print_minutes: AppState.currentItem.print_minutes || 0,
       profit_margin_percent: AppState.currentItem.profit_margin_percent ?? 100,
+      discount_percent: AppState.currentItem.calc ? (AppState.currentItem.calc.discount_percent || 0) : (AppState.currentItem.discount_percent || 0),
+      vinted_auto_discount: !!AppState.currentItem.vinted_auto_discount,
       filament_assignments: AppState.currentItem.filament_assignments,
       calculation_summary: AppState.currentItem.calc || calculateItemCostClient(AppState.currentItem, AppState.settings),
       total_price_huf: AppState.currentItem.calc ? AppState.currentItem.calc.total_price : 0
@@ -1201,7 +1379,9 @@ function loadProjectIntoCalc(projId) {
   AppState.currentItem.quantity = item.quantity || 1;
   AppState.currentItem.print_hours = item.print_hours || 0;
   AppState.currentItem.print_minutes = item.print_minutes || 0;
-  AppState.currentItem.profit_margin_percent = item.profit_margin_percent || 100;
+  AppState.currentItem.profit_margin_percent = item.profit_margin_percent ?? 100;
+  AppState.currentItem.discount_percent = Number(item.discount_percent ?? item.calculation_summary?.discount_percent ?? 0) || 0;
+  AppState.currentItem.vinted_auto_discount = !!(item.vinted_auto_discount ?? item.calculation_summary?.vinted_auto_discount);
 
   // AMS slotok visszaállítása
   for (let s = 0; s < 8; s++) {
@@ -1397,16 +1577,26 @@ function populateSettingsForm() {
   setVal("set-elec", s.electricity_kwh_cost || 70);
   setVal("set-profit", s.default_profit_margin_percent ?? 100);
   setVal("set-tax", s.tax_rate_percent || 0);
+  setVal("set-vinted-2", s.vinted_discount_2_items ?? 10);
+  setVal("set-vinted-3", s.vinted_discount_3_items ?? 15);
+  setVal("set-vinted-5", s.vinted_discount_5_items ?? 20);
 }
 
 async function saveSettingsSubmit(event) {
   event.preventDefault();
   const form = event.target;
+  const toNum = (el, def) => {
+    const n = parseFloat(el?.value);
+    return Number.isFinite(n) ? n : def;
+  };
   const payload = {
-    printer_avg_power_watts: parseFloat(form.power.value),
-    electricity_kwh_cost: parseFloat(form.elec.value),
-    default_profit_margin_percent: parseFloat(form.profit.value),
-    tax_rate_percent: parseFloat(form.tax.value)
+    printer_avg_power_watts: toNum(form.power, 120),
+    electricity_kwh_cost: toNum(form.elec, 70),
+    default_profit_margin_percent: toNum(form.profit, 100),
+    tax_rate_percent: toNum(form.tax, 0),
+    vinted_discount_2_items: Math.max(0, Math.min(90, toNum(form.vinted2, 10))),
+    vinted_discount_3_items: Math.max(0, Math.min(90, toNum(form.vinted3, 15))),
+    vinted_discount_5_items: Math.max(0, Math.min(90, toNum(form.vinted5, 20)))
   };
 
   if (isCloudMode()) {
@@ -1414,6 +1604,7 @@ async function saveSettingsSubmit(event) {
     await persistCloudMutation();
     alert("✅ Beállítások sikeresen elmentve!");
     recalculateCurrentItem();
+    recalculateSaleForm();
     return;
   }
 
@@ -1422,6 +1613,7 @@ async function saveSettingsSubmit(event) {
     AppState.settings = res.settings;
     alert("✅ Beállítások sikeresen elmentve!");
     recalculateCurrentItem();
+    recalculateSaleForm();
   } else {
     alert("❌ Hiba a beállítások mentésekor: " + (res?.error || "Nem fut a helyi háttérszerver!"));
   }
@@ -1507,6 +1699,16 @@ function renderQuoteView() {
       </div>
 
       <div class="quote-totals-box">
+        ${(calc.discount_percent > 0 && calc.discount_amount_huf > 0) ? `
+          <div style="display:flex; justify-content:space-between; padding:4px 0; color:#718096;">
+            <span>Eredeti listaár:</span>
+            <span style="text-decoration:line-through;">${(calc.list_total_price || calc.total_price).toLocaleString('hu-HU')} Ft</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; color:#0284C7; font-weight:700;">
+            <span>🏷️ Csomagkedvezmény (-${calc.discount_percent}%):</span>
+            <span>-${calc.discount_amount_huf.toLocaleString('hu-HU')} Ft</span>
+          </div>
+        ` : ''}
         <div style="display:flex; justify-content:space-between; padding:5px 0;">
           <span>Nyomtatási díj:</span>
           <strong>${calc.total_price.toLocaleString('hu-HU')} Ft</strong>
@@ -1629,6 +1831,14 @@ function renderSalesTable(filteredSales = null) {
     const channelBadge = s.channel 
       ? `<span class="badge-channel">${s.channel}</span>` 
       : '';
+    const discPct = Number(s.discount_percent) || 0;
+    const discBadge = discPct > 0
+      ? ` <span class="badge-discount">🏷️ -${discPct}%</span>`
+      : '';
+    const origList = Number(s.original_list_price_huf) || 0;
+    const origPriceHtml = (origList > 0 && origList > (s.total_sale_price_huf || 0))
+      ? `<div style="font-size:10px; color:var(--text-dim); text-decoration:line-through;">${Math.round(origList).toLocaleString('hu-HU')} Ft</div>`
+      : '';
     const buyerText = s.buyer_name 
       ? `<strong>${s.buyer_name}</strong>` 
       : '<span style="color:var(--text-dim);">Névtelen vevő</span>';
@@ -1648,13 +1858,14 @@ function renderSalesTable(filteredSales = null) {
         <td>
           <div style="display:flex; flex-direction:column; gap:3px;">
             <div>${buyerText}</div>
-            <div>${channelBadge}</div>
+            <div>${channelBadge}${discBadge}</div>
           </div>
         </td>
         <td style="text-align:right; color:var(--text-muted); white-space:nowrap;">
           ${Math.round(s.total_cost_huf).toLocaleString('hu-HU')} Ft
         </td>
         <td style="text-align:right; font-weight:700; color:var(--orange-primary); white-space:nowrap;">
+          ${origPriceHtml}
           ${Math.round(s.total_sale_price_huf).toLocaleString('hu-HU')} Ft
         </td>
         <td style="text-align:right; white-space:nowrap;" class="${profitClass}">
@@ -1683,13 +1894,25 @@ function initSaleForm() {
     dateInput.value = today;
   }
 
+  const channelEl = document.getElementById("sale-channel");
+  if (channelEl && !channelEl.dataset.vintedBound) {
+    channelEl.dataset.vintedBound = "1";
+    channelEl.addEventListener("change", () => {
+      if (channelEl.value === "Vinted") {
+        setSaleDiscountMode("auto");
+      } else {
+        setSaleDiscountMode("fixed", 0);
+      }
+    });
+  }
+
   const container = document.getElementById("sale-items-builder-list");
   if (container && container.children.length === 0) {
     addSaleItemRow();
   }
 }
 
-function addSaleItemRow(defaultName = '', defaultCost = 0, defaultQty = 1, defaultProjId = null) {
+function addSaleItemRow(defaultName = '', defaultCost = 0, defaultQty = 1, defaultProjId = null, defaultListPrice = 0) {
   const container = document.getElementById("sale-items-builder-list");
   if (!container) return;
 
@@ -1736,6 +1959,13 @@ function addSaleItemRow(defaultName = '', defaultCost = 0, defaultQty = 1, defau
              style="width:100%; font-size:13px; padding:6px 8px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--text-main); text-align:right;">
     </div>
 
+    <div class="sale-item-price">
+      <span class="sale-mobile-label">1 db Listaár (Ft)</span>
+      <input type="number" class="sale-row-price" min="0" step="1" value="${defaultListPrice}" 
+             oninput="onSaleItemRowUpdated('${rowId}')" placeholder="0"
+             style="width:100%; font-size:13px; padding:6px 8px; background:var(--bg-input); border:1px solid var(--border-color); border-radius:var(--radius-sm); color:var(--orange-primary); font-weight:700; text-align:right;">
+    </div>
+
     <div class="sale-row-actions">
       <div style="text-align:right; font-weight:700; color:var(--silver-primary); font-size:13px;">
         <span class="sale-mobile-label" style="text-align:left; margin-bottom:0;">Sor költsége:</span>
@@ -1772,6 +2002,7 @@ function onSaleProductSelectChanged(rowId, selectEl) {
 
   const nameInput = row.querySelector(".sale-row-name");
   const costInput = row.querySelector(".sale-row-cost");
+  const priceInput = row.querySelector(".sale-row-price");
   const selectedOpt = selectEl.options[selectEl.selectedIndex];
 
   if (selectedOpt && selectedOpt.value && selectedOpt.value !== "custom") {
@@ -1781,16 +2012,15 @@ function onSaleProductSelectChanged(rowId, selectEl) {
 
     if (nameInput) nameInput.value = prodName;
     if (costInput) costInput.value = prodCost;
+    if (priceInput) priceInput.value = prodPrice;
 
-    const totalPriceInput = document.getElementById("sale-total-price-input");
-    if (totalPriceInput && (!totalPriceInput.value || totalPriceInput.value === "0")) {
-      totalPriceInput.value = prodPrice > 0 ? prodPrice : "";
-    }
+    AppState.saleManualPriceOverride = false;
   } else if (selectedOpt && selectedOpt.value === "custom") {
     if (nameInput) {
       nameInput.value = "";
       nameInput.focus();
     }
+    if (priceInput && !priceInput.value) priceInput.value = 0;
   }
 
   onSaleItemRowUpdated(rowId);
@@ -1815,30 +2045,126 @@ function onSaleItemRowUpdated(rowId) {
   recalculateSaleForm();
 }
 
-function recalculateSaleForm() {
+function setSaleDiscountMode(mode, pct = 0) {
+  AppState.saleManualPriceOverride = false;
+  if (mode === "auto") {
+    AppState.saleDiscountMode = "auto";
+  } else {
+    AppState.saleDiscountMode = "fixed";
+    AppState.saleDiscountPercent = Math.max(0, Math.min(90, parseFloat(pct) || 0));
+  }
+  recalculateSaleForm();
+}
+
+function onSaleCustomDiscountInput(rawVal) {
+  AppState.saleManualPriceOverride = false;
+  AppState.saleDiscountMode = "fixed";
+  AppState.saleDiscountPercent = Math.max(0, Math.min(90, parseFloat(rawVal) || 0));
+  recalculateSaleForm();
+}
+
+function onSaleManualPriceInput() {
+  AppState.saleManualPriceOverride = true;
+  recalculateSaleForm();
+}
+
+function getCurrentSaleFormMetrics() {
   const container = document.getElementById("sale-items-builder-list");
-  if (!container) return;
+  if (!container) {
+    return { totalCost: 0, totalListPrice: 0, totalQty: 0, discountPct: 0, discountAmount: 0, discountedTotal: 0 };
+  }
 
   let totalCost = 0;
+  let totalListPrice = 0;
+  let totalQty = 0;
   const rows = container.querySelectorAll(".sale-item-row");
 
   rows.forEach(r => {
     const qty = Math.max(1, parseInt(r.querySelector(".sale-row-qty")?.value) || 1);
     const cost = Math.max(0, parseFloat(r.querySelector(".sale-row-cost")?.value) || 0);
-    totalCost += (qty * cost);
+    const listP = Math.max(0, parseFloat(r.querySelector(".sale-row-price")?.value) || 0);
+    totalCost += qty * cost;
+    totalListPrice += qty * listP;
+    totalQty += qty;
   });
 
+  const discountPct = AppState.saleDiscountMode === "auto"
+    ? getVintedDiscountForQuantity(totalQty, AppState.settings)
+    : Math.max(0, Math.min(90, Number(AppState.saleDiscountPercent) || 0));
+
+  const discountedTotal = totalListPrice > 0
+    ? Math.round(totalListPrice * (1 - discountPct / 100))
+    : 0;
+  const discountAmount = Math.max(0, Math.round(totalListPrice) - discountedTotal);
+
+  return {
+    totalCost: Math.round(totalCost),
+    totalListPrice: Math.round(totalListPrice),
+    totalQty,
+    discountPct: Math.round(discountPct * 10) / 10,
+    discountAmount,
+    discountedTotal
+  };
+}
+
+function recalculateSaleForm() {
+  const m = getCurrentSaleFormMetrics();
+
+  document.querySelectorAll("[data-sale-disc]").forEach(btn => {
+    const val = btn.getAttribute("data-sale-disc");
+    const active = val === "auto"
+      ? AppState.saleDiscountMode === "auto"
+      : (AppState.saleDiscountMode !== "auto" && Number(val) === m.discountPct);
+    btn.classList.toggle("active", active);
+  });
+
+  const discInput = document.getElementById("sale-discount-input");
+  if (discInput && document.activeElement !== discInput) {
+    discInput.value = m.discountPct;
+  }
+
+  const statusBadge = document.getElementById("sale-discount-status");
+  if (statusBadge) {
+    if (m.discountPct > 0) {
+      statusBadge.innerText = m.discountAmount > 0
+        ? `🏷️ ${m.totalQty} db → -${m.discountPct}% (-${m.discountAmount.toLocaleString('hu-HU')} Ft)`
+        : `🏷️ ${m.totalQty} db → -${m.discountPct}% aktív`;
+    } else {
+      statusBadge.innerText = AppState.saleDiscountMode === "auto"
+        ? `Nincs kedvezmény (${m.totalQty} db — 2 db-tól -${getVintedDiscountTiers().two}%)`
+        : `Nincs kedvezmény (0%)`;
+    }
+  }
+
   const salePriceInput = document.getElementById("sale-total-price-input");
+  if (salePriceInput && !AppState.saleManualPriceOverride && m.totalListPrice > 0) {
+    salePriceInput.value = m.discountedTotal;
+  }
+
   const salePrice = Math.max(0, parseFloat(salePriceInput?.value) || 0);
+  const effectiveDiscountAmt = m.totalListPrice > salePrice && m.totalListPrice > 0
+    ? Math.round(m.totalListPrice - salePrice)
+    : m.discountAmount;
+  const effectiveDiscountPct = (AppState.saleManualPriceOverride && m.totalListPrice > 0 && salePrice < m.totalListPrice)
+    ? Math.round(((m.totalListPrice - salePrice) / m.totalListPrice) * 1000) / 10
+    : m.discountPct;
 
-  const profit = Math.round(salePrice - totalCost);
-  const margin = totalCost > 0 ? Math.round((profit / totalCost) * 100) : 0;
+  const profit = Math.round(salePrice - m.totalCost);
+  const margin = m.totalCost > 0 ? Math.round((profit / m.totalCost) * 100) : 0;
 
+  const listPreview = document.getElementById("sale-preview-list-price");
+  const discPreview = document.getElementById("sale-preview-discount");
   const costPreview = document.getElementById("sale-preview-cost");
   const profitPreview = document.getElementById("sale-preview-profit");
   const marginPreview = document.getElementById("sale-preview-margin");
 
-  if (costPreview) costPreview.innerText = `${Math.round(totalCost).toLocaleString('hu-HU')} Ft`;
+  if (listPreview) listPreview.innerText = `${m.totalListPrice.toLocaleString('hu-HU')} Ft`;
+  if (discPreview) {
+    discPreview.innerText = effectiveDiscountPct > 0
+      ? `-${effectiveDiscountPct}% (-${effectiveDiscountAmt.toLocaleString('hu-HU')} Ft)`
+      : `0% (0 Ft)`;
+  }
+  if (costPreview) costPreview.innerText = `${m.totalCost.toLocaleString('hu-HU')} Ft`;
   if (profitPreview) {
     profitPreview.innerText = `${profit >= 0 ? '+' : ''}${profit.toLocaleString('hu-HU')} Ft`;
     profitPreview.style.color = profit >= 0 ? "var(--green)" : "var(--red)";
@@ -1895,10 +2221,12 @@ async function handleSaleSubmit(e) {
     const nameInput = r.querySelector(".sale-row-name");
     const qtyInput = r.querySelector(".sale-row-qty");
     const costInput = r.querySelector(".sale-row-cost");
+    const priceInput = r.querySelector(".sale-row-price");
 
     const name = nameInput?.value.trim() || (sel?.options[sel.selectedIndex]?.getAttribute("data-name")) || "Nyomtatott Modell";
     const qty = Math.max(1, parseInt(qtyInput?.value) || 1);
     const unitCost = Math.max(0, parseFloat(costInput?.value) || 0);
+    const unitListPrice = Math.max(0, parseFloat(priceInput?.value) || 0);
     const projId = sel?.value && sel.value !== "custom" ? parseInt(sel.value) : null;
 
     items.push({
@@ -1906,7 +2234,8 @@ async function handleSaleSubmit(e) {
       item_name: name,
       quantity: qty,
       unit_cost_huf: unitCost,
-      total_cost_huf: Math.round(qty * unitCost)
+      total_cost_huf: Math.round(qty * unitCost),
+      unit_sale_price_huf: unitListPrice
     });
   });
 
@@ -1915,12 +2244,19 @@ async function handleSaleSubmit(e) {
     return;
   }
 
+  const metrics = getCurrentSaleFormMetrics();
+  const appliedDiscountPct = (AppState.saleManualPriceOverride && metrics.totalListPrice > 0 && totalPrice < metrics.totalListPrice)
+    ? Math.round(((metrics.totalListPrice - totalPrice) / metrics.totalListPrice) * 1000) / 10
+    : metrics.discountPct;
+
   const payload = {
     sale_date: saleDate,
     buyer_name: buyerName,
     channel: channel,
     notes: notes,
     total_sale_price_huf: totalPrice,
+    discount_percent: appliedDiscountPct,
+    original_list_price_huf: metrics.totalListPrice,
     items: items
   };
 
@@ -1957,6 +2293,8 @@ async function handleSaleSubmit(e) {
         total_cost_huf: totalCost,
         profit_huf: profit,
         profit_margin_percent: totalCost > 0 ? Math.round((profit / totalCost) * 1000) / 10 : 0,
+        discount_percent: payload.discount_percent || 0,
+        original_list_price_huf: payload.original_list_price_huf || 0,
         items_count: payload.items.reduce((acc, it) => acc + (it.quantity || 1), 0),
         items_summary: payload.items.map(it => `${it.item_name} (${it.quantity}x)`).join(", "),
         is_bundle: payload.items.length > 1,
@@ -1979,10 +2317,12 @@ async function handleSaleSubmit(e) {
       if (document.getElementById("sale-notes")) document.getElementById("sale-notes").value = "";
       if (document.getElementById("sale-total-price-input")) document.getElementById("sale-total-price-input").value = "";
 
+      AppState.saleManualPriceOverride = false;
       if (container) {
         container.innerHTML = "";
         addSaleItemRow();
       }
+      setSaleDiscountMode(channel === "Vinted" ? "auto" : "fixed", 0);
 
       if (btn) {
         btn.innerText = "✅ Eladás Sikeresen Rögzítve!";
