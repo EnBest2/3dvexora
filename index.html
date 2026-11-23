@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" href="assets/apple-touch-icon.png">
   <meta name="theme-color" content="#0B0C10">
   
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
@@ -206,6 +206,7 @@
             
             <div class="price-display-box">
               <div class="price-label">Javasolt Eladási Ár (Végösszeg)</div>
+              <div class="price-list-strike" id="sidebar-list-price" style="display:none;">0 Ft</div>
               <div class="grand-price" id="sidebar-grand-price">0 Ft</div>
               <div class="unit-price-badge" id="sidebar-unit-price">
                 0 Ft / db
@@ -213,6 +214,28 @@
               <div class="cost-profit-pills">
                 <span class="pill pill-cost" id="sidebar-cost-pill">1 db önköltség: 0 Ft</span>
                 <span class="pill pill-profit" id="sidebar-profit-pill">Haszon: +0 Ft</span>
+              </div>
+            </div>
+
+            <!-- Vinted Csomagkedvezmény Vezérlő & Szimulátor -->
+            <div class="vinted-discount-panel" id="calc-vinted-panel">
+              <div class="vinted-panel-header">
+                <span>🏷️ Vinted Csomagkedvezmény</span>
+                <span class="badge-discount" id="calc-discount-badge">0% (Alapár)</span>
+              </div>
+              <div class="vinted-chip-group">
+                <button type="button" class="vinted-chip-btn active" data-calc-disc="0" onclick="setCalcDiscountMode('fixed', 0)">0%</button>
+                <button type="button" class="vinted-chip-btn" data-calc-disc="auto" onclick="setCalcDiscountMode('auto')" title="Automatikus Vinted sávok a darabszám alapján (2 db: -10%, 3-4 db: -15%, 5+ db: -20%)">⚡ Auto</button>
+                <button type="button" class="vinted-chip-btn" data-calc-disc="10" onclick="setCalcDiscountMode('fixed', 10)">-10%</button>
+                <button type="button" class="vinted-chip-btn" data-calc-disc="15" onclick="setCalcDiscountMode('fixed', 15)">-15%</button>
+                <button type="button" class="vinted-chip-btn" data-calc-disc="20" onclick="setCalcDiscountMode('fixed', 20)">-20%</button>
+                <div style="display:inline-flex; align-items:center; gap:3px;">
+                  <input type="number" id="calc-discount-custom" min="0" max="90" step="1" value="0" class="vinted-custom-input" oninput="onCalcCustomDiscountInput(this.value)" title="Egyedi kedvezmény (%)">
+                  <span style="font-size:11px; color:var(--text-muted); font-weight:700;">%</span>
+                </div>
+              </div>
+              <div class="vinted-tiers-preview" id="calc-vinted-tiers">
+                <!-- JS tölti fel a 2 / 3-4 / 5+ db árakat -->
               </div>
             </div>
 
@@ -487,15 +510,35 @@
             <!-- Tételek fejléce -->
             <div class="sale-items-header">
               <div>Termék / Modell kiválasztása</div>
-              <div>Darabszám (db)</div>
+              <div>Db</div>
               <div>1 db Önköltség (Ft)</div>
-              <div style="text-align:right;">Sor Költsége (Ft)</div>
+              <div>1 db Listaár (Ft)</div>
+              <div style="text-align:right;">Sor Költsége</div>
               <div></div>
             </div>
 
             <!-- Dinamikus tételek konténer -->
             <div id="sale-items-builder-list">
               <!-- JS adja hozzá a sorokat -->
+            </div>
+
+            <!-- Vinted Csomagkedvezmény Sáv az eladásnál -->
+            <div class="vinted-discount-panel" style="margin-top:12px; margin-bottom:0;">
+              <div class="vinted-panel-header">
+                <span>🏷️ Vinted Többdarabos Csomagkedvezmény</span>
+                <span class="badge-discount" id="sale-discount-status">Nincs kedvezmény (1 db)</span>
+              </div>
+              <div class="vinted-chip-group">
+                <button type="button" class="vinted-chip-btn active" data-sale-disc="auto" onclick="setSaleDiscountMode('auto')">⚡ Auto Vinted</button>
+                <button type="button" class="vinted-chip-btn" data-sale-disc="0" onclick="setSaleDiscountMode('fixed', 0)">0%</button>
+                <button type="button" class="vinted-chip-btn" data-sale-disc="10" onclick="setSaleDiscountMode('fixed', 10)">-10%</button>
+                <button type="button" class="vinted-chip-btn" data-sale-disc="15" onclick="setSaleDiscountMode('fixed', 15)">-15%</button>
+                <button type="button" class="vinted-chip-btn" data-sale-disc="20" onclick="setSaleDiscountMode('fixed', 20)">-20%</button>
+                <div style="display:inline-flex; align-items:center; gap:3px;">
+                  <input type="number" id="sale-discount-input" min="0" max="90" step="1" value="0" class="vinted-custom-input" oninput="onSaleCustomDiscountInput(this.value)" title="Egyedi kedvezmény (%)">
+                  <span style="font-size:11px; color:var(--text-muted); font-weight:700;">%</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -508,16 +551,24 @@
               <div style="display:flex; align-items:center; gap:8px;">
                 <input type="number" id="sale-total-price-input" min="0" step="1" required placeholder="pl. 1400" 
                        class="sale-total-input"
-                       oninput="recalculateSaleForm()">
+                       oninput="onSaleManualPriceInput()">
                 <span style="font-size:18px; font-weight:700; color:var(--text-muted);">Ft</span>
               </div>
               <span style="font-size:12px; color:var(--text-muted); margin-top:4px; display:block;">
-                A teljes összeg, amennyiért a vevő megvette az összes fenti tételt együtt (pl. 1 400 Ft).
+                Auto Vinted módban a listaárból automatikusan levonja a csomagkedvezményt, de kézzel is felülírhatod.
               </span>
             </div>
 
             <!-- Élő előnézet -->
             <div style="background:var(--bg-dark); border:1px solid rgba(255,110,0,0.2); border-radius:var(--radius-sm); padding:14px;">
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:5px;">
+                <span>Eredeti listaár összesen:</span>
+                <strong id="sale-preview-list-price" style="color:var(--silver-muted);">0 Ft</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; color:#38BDF8; margin-bottom:5px;">
+                <span>Csomagkedvezmény:</span>
+                <strong id="sale-preview-discount">0% (0 Ft)</strong>
+              </div>
               <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted); margin-bottom:6px;">
                 <span>Összes gyártási költség:</span>
                 <strong id="sale-preview-cost" style="color:var(--text-main);">0 Ft</strong>
@@ -625,6 +676,29 @@
               <label>ÁFA / Adókulcs (%)</label>
               <input type="number" id="set-tax" name="tax" min="0" value="0">
               <small style="color:var(--text-dim); font-size:11px;">0% Alanyi Adómentes (AAM) vagy 27%</small>
+            </div>
+          </div>
+
+          <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border-color);">
+            <div style="font-size:13px; font-weight:700; color:#38BDF8; margin-bottom:10px;">
+              🏷️ Vinted Többdarabos Csomagkedvezmény Szintek (%)
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>2 db termék vásárlásakor (%)</label>
+                <input type="number" id="set-vinted-2" name="vinted2" min="0" max="90" step="1" value="10">
+                <small style="color:var(--text-dim); font-size:11px;">Alapértelmezett Vinted sáv: 10%</small>
+              </div>
+              <div class="form-group">
+                <label>3–4 db termék vásárlásakor (%)</label>
+                <input type="number" id="set-vinted-3" name="vinted3" min="0" max="90" step="1" value="15">
+                <small style="color:var(--text-dim); font-size:11px;">Alapértelmezett Vinted sáv: 15%</small>
+              </div>
+              <div class="form-group">
+                <label>5+ db termék vásárlásakor (%)</label>
+                <input type="number" id="set-vinted-5" name="vinted5" min="0" max="90" step="1" value="20">
+                <small style="color:var(--text-dim); font-size:11px;">Alapértelmezett Vinted sáv: 20%</small>
+              </div>
             </div>
           </div>
 
@@ -769,6 +843,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=5"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>
