@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-23T08:58:50.932034",
+  "exported_at": "2026-11-23T09:00:23.710357",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -19,7 +19,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-23T08:58:08.020695"
+    "last_cloud_sync": "2026-11-23T08:58:52.178521"
   },
   "filaments": [
     {
@@ -1021,6 +1021,46 @@
   ],
   "sales": [
     {
+      "id": 16,
+      "sale_date": "2026-11-23",
+      "buyer_name": "",
+      "channel": "Vinted",
+      "total_sale_price_huf": 1805.0,
+      "total_cost_huf": 662.0,
+      "profit_huf": 1143.0,
+      "profit_margin_percent": 172.66,
+      "notes": "",
+      "created_at": "2026-11-23 08:00:20",
+      "updated_at": "2026-11-23 08:00:20",
+      "discount_percent": 5.0,
+      "original_list_price_huf": 1900.0,
+      "items": [
+        {
+          "id": 17,
+          "sale_id": 16,
+          "project_id": 11,
+          "item_name": "sálasszarvasgcode.gcode",
+          "quantity": 1,
+          "unit_cost_huf": 472.0,
+          "total_cost_huf": 472.0,
+          "unit_sale_price_huf": 1000.0
+        },
+        {
+          "id": 18,
+          "sale_id": 16,
+          "project_id": 10,
+          "item_name": "Kutya.gcode",
+          "quantity": 1,
+          "unit_cost_huf": 190.0,
+          "total_cost_huf": 190.0,
+          "unit_sale_price_huf": 900.0
+        }
+      ],
+      "items_count": 2,
+      "items_summary": "1x sálasszarvasgcode.gcode, 1x Kutya.gcode",
+      "is_bundle": true
+    },
+    {
       "id": 15,
       "sale_date": "2026-11-21",
       "buyer_name": "",
@@ -1392,12 +1432,12 @@
     }
   ],
   "summary": {
-    "total_sales_count": 12,
-    "total_revenue": 12300.0,
-    "total_cost": 4056.0,
-    "total_profit": 8244.0,
-    "total_items_sold": 15,
-    "avg_profit_margin_percent": 203.3,
-    "avg_order_value": 1025.0
+    "total_sales_count": 13,
+    "total_revenue": 14105.0,
+    "total_cost": 4718.0,
+    "total_profit": 9387.0,
+    "total_items_sold": 17,
+    "avg_profit_margin_percent": 199.0,
+    "avg_order_value": 1085.0
   }
 }
