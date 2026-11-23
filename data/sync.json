@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-21T22:30:16.227016",
+  "exported_at": "2026-11-23T08:33:15.567732",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -13,10 +13,13 @@
     "electricity_kwh_cost": 70.0,
     "default_profit_margin_percent": 100.0,
     "tax_rate_percent": 0.0,
+    "vinted_discount_2_items": 10.0,
+    "vinted_discount_3_items": 15.0,
+    "vinted_discount_5_items": 20.0,
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-21T22:29:37.991633"
+    "last_cloud_sync": "2026-11-21T22:30:17.374811"
   },
   "filaments": [
     {
@@ -184,7 +187,8 @@
             ]
           },
           "total_price_huf": 900.0,
-          "items_on_plate": 1
+          "items_on_plate": 1,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -318,7 +322,8 @@
             ]
           },
           "total_price_huf": 900.0,
-          "items_on_plate": 4
+          "items_on_plate": 4,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -432,7 +437,8 @@
             ]
           },
           "total_price_huf": 2511.0,
-          "items_on_plate": 1
+          "items_on_plate": 1,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -576,7 +582,8 @@
             ]
           },
           "total_price_huf": 593.0,
-          "items_on_plate": 3
+          "items_on_plate": 3,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -720,7 +727,8 @@
             ]
           },
           "total_price_huf": 662.0,
-          "items_on_plate": 6
+          "items_on_plate": 6,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -844,7 +852,8 @@
             ]
           },
           "total_price_huf": 797.0,
-          "items_on_plate": 1
+          "items_on_plate": 1,
+          "discount_percent": 0.0
         }
       ],
       "items_count": 1,
@@ -864,6 +873,8 @@
       "notes": "",
       "created_at": "2026-11-21 21:30:12",
       "updated_at": "2026-11-21 21:30:12",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 16,
@@ -892,6 +903,8 @@
       "notes": "",
       "created_at": "2026-11-21 21:29:35",
       "updated_at": "2026-11-21 21:29:35",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 15,
@@ -920,6 +933,8 @@
       "notes": "",
       "created_at": "2026-11-21 18:29:12",
       "updated_at": "2026-11-21 18:29:12",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 14,
@@ -948,6 +963,8 @@
       "notes": "",
       "created_at": "2026-11-17 21:11:06",
       "updated_at": "2026-11-17 21:11:06",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 12,
@@ -976,6 +993,8 @@
       "notes": "",
       "created_at": "2026-11-17 21:10:39",
       "updated_at": "2026-11-17 21:10:39",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 11,
@@ -1004,6 +1023,8 @@
       "notes": "",
       "created_at": "2026-11-16 19:59:59",
       "updated_at": "2026-11-16 19:59:59",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 10,
@@ -1032,6 +1053,8 @@
       "notes": "",
       "created_at": "2026-11-15 11:06:09",
       "updated_at": "2026-11-15 11:06:09",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 9,
@@ -1060,6 +1083,8 @@
       "notes": "",
       "created_at": "2026-11-14 19:12:15",
       "updated_at": "2026-11-14 19:12:15",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 7,
@@ -1088,6 +1113,8 @@
       "notes": "cica maci",
       "created_at": "2026-11-14 19:08:25",
       "updated_at": "2026-11-14 19:08:25",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 4,
@@ -1126,6 +1153,8 @@
       "notes": "cica",
       "created_at": "2026-11-14 19:07:22",
       "updated_at": "2026-11-14 19:07:22",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 3,
@@ -1154,6 +1183,8 @@
       "notes": "cica",
       "created_at": "2026-11-14 19:06:13",
       "updated_at": "2026-11-14 19:06:13",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 2,
@@ -1182,6 +1213,8 @@
       "notes": "Medve",
       "created_at": "2026-11-14 19:05:15",
       "updated_at": "2026-11-14 19:05:15",
+      "discount_percent": 0.0,
+      "original_list_price_huf": 0.0,
       "items": [
         {
           "id": 1,
