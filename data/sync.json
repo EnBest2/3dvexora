@@ -1,6 +1,6 @@
 {
   "studio": "3DVEXORA",
-  "exported_at": "2026-11-28T12:00:36.466978",
+  "exported_at": "2026-11-28T12:02:34.395456",
   "device": "PC",
   "settings": {
     "studio_name": "3DVEXORA",
@@ -19,7 +19,7 @@
     "github_user": "EnBest2",
     "github_repo": "3dvexora",
     "github_pages_url": "https://enbest2.github.io/3dvexora/",
-    "last_cloud_sync": "2026-11-23T09:00:25.067005"
+    "last_cloud_sync": "2026-11-28T12:00:38.132582"
   },
   "filaments": [
     {
@@ -89,6 +89,165 @@
     }
   ],
   "projects": [
+    {
+      "id": 12,
+      "project_name": "szarvasgyertya.gcode",
+      "client_name": "",
+      "client_contact": "",
+      "notes": "",
+      "status": "Mentve",
+      "created_at": "2026-11-28 11:02:30",
+      "updated_at": "2026-11-28 11:02:30",
+      "items": [
+        {
+          "id": 15,
+          "project_id": 12,
+          "name": "szarvasgyertya.gcode",
+          "quantity": 1,
+          "print_hours": 8.0,
+          "print_minutes": 40.0,
+          "profit_margin_percent": 120.4,
+          "filament_assignments": [
+            {
+              "slot": 1,
+              "filament_id": 16,
+              "grams": 160.7
+            },
+            {
+              "slot": 2,
+              "filament_id": 13,
+              "grams": 2.9
+            },
+            {
+              "slot": 3,
+              "filament_id": 11,
+              "grams": 7.4
+            },
+            {
+              "slot": 4,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 5,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 6,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 7,
+              "filament_id": null,
+              "grams": 0
+            },
+            {
+              "slot": 8,
+              "filament_id": null,
+              "grams": 0
+            }
+          ],
+          "calculation_summary": {
+            "items_on_plate": 1,
+            "quantity": 1,
+            "discount_percent": 0,
+            "vinted_auto_discount": false,
+            "unit_grams": 171,
+            "unit_time_formatted": "8ó 40p",
+            "unit_material_cost": 835,
+            "unit_electricity_cost": 73,
+            "unit_net_cost": 908,
+            "unit_profit": 1092,
+            "unit_sale_price": 2000,
+            "list_unit_sale_price": 2000,
+            "total_grams": 171,
+            "total_print_hours": 8.67,
+            "print_time_formatted": "8ó 40p",
+            "plate_time_formatted": "8ó 40p",
+            "total_kwh_used": 1.04,
+            "total_material_cost": 835,
+            "total_electricity_cost": 73,
+            "total_net_cost": 908,
+            "total_profit": 1092,
+            "total_price": 2000,
+            "list_total_price": 2000,
+            "discount_amount_huf": 0,
+            "vinted_tiers": [
+              {
+                "sample_qty": 2,
+                "label": "2 db",
+                "discount_percent": 10,
+                "unit_price": 1800,
+                "total_price": 3600,
+                "unit_profit": 892,
+                "total_profit": 1785
+              },
+              {
+                "sample_qty": 3,
+                "label": "3–4 db",
+                "discount_percent": 15,
+                "unit_price": 1700,
+                "total_price": 5100,
+                "unit_profit": 792,
+                "total_profit": 2377
+              },
+              {
+                "sample_qty": 5,
+                "label": "5+ db",
+                "discount_percent": 20,
+                "unit_price": 1600,
+                "total_price": 8000,
+                "unit_profit": 692,
+                "total_profit": 3462
+              }
+            ],
+            "cost_percentages": {
+              "material": 92,
+              "electricity": 8
+            },
+            "filaments": [
+              {
+                "slot": 1,
+                "filament_id": 16,
+                "name": "Sunlu PLA (Csokoládé Barna)",
+                "color_hex": "#82400d",
+                "plate_grams": 160.7,
+                "unit_grams": 160.7,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 784.2
+              },
+              {
+                "slot": 2,
+                "filament_id": 13,
+                "name": "Flashforge PLA (Fekete Matt)",
+                "color_hex": "#000000",
+                "plate_grams": 2.9,
+                "unit_grams": 2.9,
+                "cost_per_g": 4.99,
+                "slot_cost_plate": 14.5
+              },
+              {
+                "slot": 3,
+                "filament_id": 11,
+                "name": "Alzament PLA (Red Matt)",
+                "color_hex": "#ff0000",
+                "plate_grams": 7.4,
+                "unit_grams": 7.4,
+                "cost_per_g": 4.88,
+                "slot_cost_plate": 36.1
+              }
+            ]
+          },
+          "total_price_huf": 2000.0,
+          "items_on_plate": 1,
+          "discount_percent": 0.0
+        }
+      ],
+      "items_count": 1,
+      "total_price_huf": 2000.0
+    },
     {
       "id": 11,
       "project_name": "sálasszarvasgcode.gcode",
